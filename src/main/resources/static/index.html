@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoInsight Colombia</title>
+  <link rel="stylesheet" href="/lib/leaflet/leaflet.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/point-markers.css">
+  <link rel="stylesheet" href="/css/comparison.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-group">
+        <button id="sidebar-toggle" class="icon-button menu-button" type="button" aria-label="Ocultar menú">☰</button>
+        <div class="brand-mark" aria-hidden="true">G</div>
+        <h1 class="logo">GeoInsight <span>Colombia</span></h1>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside id="sidebar" class="sidebar">
+        <nav class="tool-nav" aria-label="Herramientas principales">
+          <button id="nav-explore" data-tool="explore" class="active" type="button"><span class="nav-icon">▥</span><span>Explorar mapa</span></button>
+          <button id="nav-filters" data-tool="filters" type="button"><span class="nav-icon">⌕</span><span>Buscar y filtrar</span></button>
+          <button id="nav-context" data-tool="context" type="button"><span class="nav-icon">⌖</span><span>Consulta por coordenada</span></button>
+          <button id="nav-zone" data-tool="zone" type="button"><span class="nav-icon">◉</span><span>Análisis de zona</span></button>
+          <button id="nav-compare" data-tool="compare" type="button"><span class="nav-icon">▦</span><span>Comparación de zonas</span></button>
+          <span class="nav-separator"></span>
+          <button id="nav-admin" data-tool="admin" class="hidden" type="button"><span class="nav-icon">⚙</span><span>Administración</span></button>
+          <button id="nav-help" data-tool="help" type="button"><span class="nav-icon">ⓘ</span><span>Ayuda</span></button>
+        </nav>
+        <div class="account-card">
+          <div class="avatar" id="user-avatar">U</div>
+          <div><strong id="account-name">Usuario</strong><small id="account-role">Consulta</small></div>
+          <button id="logout-button" class="logout-icon" type="button" aria-label="Cerrar sesión">↪</button>
+        </div>
+      </aside>
+
+      <aside id="tool-drawer" class="tool-drawer">
+        <section id="panel-explore" class="tool-panel">
+          <div class="panel-heading"><div><span class="eyebrow">VISUALIZACIÓN</span><h2>Capas del mapa</h2></div></div>
+          <div id="layer-list" class="layer-list"><div class="skeleton">Cargando capas…</div></div>
+          <p class="panel-tip"><span>i</span> Selecciona una entidad en el mapa para consultar sus atributos y procedencia.</p>
+        </section>
+
+        <section id="panel-filters" class="tool-panel hidden">
+          <div class="panel-heading"><div><span class="eyebrow">EXPLORACIÓN</span><h2>Buscar y filtrar</h2></div></div>
+          <p class="hint">Los criterios disponibles provienen directamente de los datos del SGC.</p>
+          <label for="filter-domain">Capa</label><select id="filter-domain"></select>
+          <div id="filter-builder" class="hidden">
+            <label for="filter-attribute">Atributo</label><select id="filter-attribute"></select>
+            <label for="filter-value">Valor</label><select id="filter-value"></select>
+            <button id="filter-add" class="primary full-width" type="button">Aplicar filtro</button>
+          </div>
+          <div id="filter-note" class="empty-state hidden">Activa al menos una capa para comenzar.</div>
+          <div id="filter-list"></div><div id="filter-feedback"></div><div id="filter-results"></div>
+        </section>
+
+        <section id="panel-context" class="tool-panel hidden">
+          <div class="panel-heading"><div><span class="eyebrow">UBICACIÓN</span><h2>Consulta por coordenada</h2></div></div>
+          <p class="hint">Ingresa una coordenada o haz clic sobre el mapa.</p>
+          <div class="form-grid"><div><label for="context-lon">Longitud</label><input id="context-lon" type="number" step="any" placeholder="-74.0700"></div><div><label for="context-lat">Latitud</label><input id="context-lat" type="number" step="any" placeholder="4.7100"></div></div>
+          <button id="context-button" class="primary full-width" type="button">Consultar ubicación</button>
+          <div id="context-result" class="result-box"><span class="empty">Aún no has realizado una consulta.</span></div>
+        </section>
+
+        <section id="panel-zone" class="tool-panel hidden">
+          <div class="panel-heading"><div><span class="eyebrow">ANÁLISIS</span><h2>Análisis de zona</h2></div></div>
+          <p class="hint">Caracteriza descriptivamente el entorno de un punto.</p>
+          <div class="form-grid"><div><label for="zone-lon">Longitud</label><input id="zone-lon" type="number" step="any" placeholder="-74.0700"></div><div><label for="zone-lat">Latitud</label><input id="zone-lat" type="number" step="any" placeholder="4.7100"></div></div>
+          <button id="zone-pick" class="map-pick-button" type="button"><span aria-hidden="true">⌖</span> Elegir punto en el mapa</button>
+          <label for="zone-radius">Radio de análisis (metros)</label><input id="zone-radius" type="number" min="1" step="any" placeholder="10000">
+          <button id="zone-button" class="primary full-width" type="button">Analizar zona</button>
+          <div id="zone-result" class="result-box"><span class="empty">Aún no hay un análisis.</span></div>
+        </section>
+
+        <section id="panel-compare" class="tool-panel hidden">
+          <div class="panel-heading"><div><span class="eyebrow">COMPARACIÓN</span><h2>Comparar zonas</h2></div></div>
+          <label for="compare-radius">Radio común (metros)</label><input id="compare-radius" type="number" min="1" step="any" placeholder="10000">
+          <div class="zone-label"><span>A</span> Zona A</div><div class="form-grid"><div><label for="compare-a-lon">Longitud</label><input id="compare-a-lon" type="number" step="any" placeholder="-74.0700"></div><div><label for="compare-a-lat">Latitud</label><input id="compare-a-lat" type="number" step="any" placeholder="4.7100"></div></div>
+          <button id="compare-a-pick" class="map-pick-button" type="button"><span aria-hidden="true">⌖</span> Elegir Zona A en el mapa</button>
+          <div class="zone-label zone-b"><span>B</span> Zona B</div><div class="form-grid"><div><label for="compare-b-lon">Longitud</label><input id="compare-b-lon" type="number" step="any" placeholder="-75.0000"></div><div><label for="compare-b-lat">Latitud</label><input id="compare-b-lat" type="number" step="any" placeholder="5.0000"></div></div>
+          <button id="compare-b-pick" class="map-pick-button" type="button"><span aria-hidden="true">⌖</span> Elegir Zona B en el mapa</button>
+          <button id="compare-button" class="primary full-width" type="button">Comparar zonas</button>
+          <div id="compare-result" class="result-box compare-result"><span class="empty">Aún no hay una comparación.</span></div>
+        </section>
+
+        <section id="panel-admin" class="tool-panel hidden">
+          <div class="panel-heading"><div><span class="eyebrow">GEOINSIGHT</span><h2>Administración</h2></div></div>
+          <div class="admin-layout">
+            <div class="admin-form-column">
+              <p class="hint">Gestiona únicamente entidades propias. Los registros SGC son inmutables.</p>
+              <label for="admin-domain">Dominio</label><select id="admin-domain"></select>
+              <div id="admin-fields" class="admin-fields"></div>
+              <div class="admin-geometry-block">
+                <label>Geometría</label>
+                <p id="admin-geometry-hint" class="hint"></p>
+                <div class="button-row"><button id="admin-draw" class="secondary" type="button">Dibujar en el mapa</button><button id="admin-finish-draw" class="secondary hidden" type="button">Finalizar dibujo</button></div>
+                <div id="admin-geometry-status" class="admin-geometry-status empty">Aún no se ha dibujado una geometría.</div>
+              </div>
+              <div class="button-row"><button id="admin-create" class="primary" type="button">Crear entidad</button><button id="admin-clear" class="secondary" type="button">Limpiar</button></div>
+            </div>
+            <div id="admin-list" class="admin-list-column"></div>
+          </div>
+        </section>
+
+        <section id="panel-help" class="tool-panel hidden">
+          <div class="panel-heading"><div><span class="eyebrow">GUÍA DE USO</span><h2>Ayuda</h2></div></div>
+          <p class="hint">GeoInsight presenta información geocientífica descriptiva. Sus resultados no representan evaluaciones de riesgo, amenaza o seguridad.</p>
+          <div class="help-modules">
+            <article class="help-module"><h3>Explorar mapa</h3><p>Activa una o varias capas y haz clic sobre una entidad para consultar sus atributos y procedencia. Las capas comienzan desactivadas.</p></article>
+            <article class="help-module"><h3>Buscar y filtrar</h3><p>Selecciona una capa, atributo y valor. Los valores del mismo atributo se combinan con O; atributos diferentes se combinan con Y. Selecciona una fila para acercarte al registro.</p></article>
+            <article class="help-module"><h3>Consulta por coordenada</h3><p>Ingresa longitud y latitud. Cuando esta herramienta está abierta también puedes hacer clic directamente en el mapa para consultar el contexto del punto.</p></article>
+            <article class="help-module"><h3>Análisis de zona</h3><p>Define un centro y un radio en metros, manualmente o con “Elegir punto en el mapa”. El sistema muestra conteos y distribuciones descriptivas dentro de la zona.</p></article>
+            <article class="help-module"><h3>Comparación de zonas</h3><p>Define las zonas A y B y un radio común. Puedes escribir las coordenadas o elegir cada centro en el mapa. Los resultados equivalentes se muestran lado a lado.</p></article>
+            <article id="help-admin" class="help-module hidden"><h3>Administración</h3><p>Permite gestionar únicamente entidades propias de GeoInsight; los registros del SGC son de solo lectura.</p></article>
+          </div>
+        </section>
+      </aside>
+
+      <main class="map-panel">
+        <div id="map"></div>
+        <button id="drawer-toggle" class="map-float-button drawer-toggle" type="button" aria-label="Ocultar panel">‹</button>
+        <div id="map-status" class="map-status"><span class="pulse"></span><span>Mapa listo</span></div>
+        <div id="entity-info" class="entity-card hidden"><span class="empty">Selecciona una entidad del mapa.</span></div>
+        <div id="cursor-coords" class="coord-bar"><span>Coordenadas del cursor:</span><strong>—</strong><i></i><span>EPSG:4326 (WGS 84)</span></div>
+      </main>
+    </div>
+  </div>
+  <div id="delete-modal" class="app-modal hidden" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+    <div class="app-modal-backdrop" data-modal-cancel></div>
+    <div class="app-modal-card">
+      <div class="app-modal-icon" aria-hidden="true">!</div>
+      <h2 id="delete-modal-title">Eliminar entidad</h2>
+      <p id="delete-modal-message"></p>
+      <p class="app-modal-warning">Esta acción no se puede deshacer.</p>
+      <div class="app-modal-actions">
+        <button id="delete-modal-cancel" class="secondary" type="button">Cancelar</button>
+        <button id="delete-modal-confirm" class="danger" type="button">Eliminar</button>
+      </div>
+    </div>
+  </div>
+  <script src="/lib/leaflet/leaflet.js"></script><script src="/js/api.js"></script><script src="/js/ui.js"></script><script src="/js/map.js"></script><script src="/js/context.js"></script><script src="/js/zone.js"></script><script src="/js/compare.js"></script><script src="/js/admin.js"></script>
+</body>
+</html>
