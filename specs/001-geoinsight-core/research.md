@@ -38,6 +38,23 @@ Fase 0 del workflow `/speckit.plan`. Consolidación de decisiones verificadas; n
 
 ## 2. Perfiles de datos locales
 
+### Disponibilidad y reintentos de bootstrap
+
+**Decision**: el bootstrap se ejecuta durante la inicialización de singletons,
+antes de que Tomcat abra el puerto. Cada dataset se valida contra su conteo
+oficial versionado y las descargas fallidas se reintentan un número finito y
+configurable de veces con espera incremental. Después de agotar los intentos,
+el arranque continúa con ausencia explícita para ese dominio.
+
+**Rationale**: evita exponer una API aparentemente lista con cinco capas en
+estado transitorio `dataAvailable=false`, tolera fallos breves de red y evita
+que un proveedor externo pueda bloquear indefinidamente el servidor local.
+
+**Alternatives considered**:
+- Servir una pantalla de carga mientras el puerto ya está abierto: descartado;
+  permite que otros clientes consuman el estado parcial.
+- Reintentar indefinidamente: descartado; impediría arrancar sin conexión.
+
 **Decision**: Los diccionarios de datos (campos, tipos, dominios de valores, nulabilidad) se derivan de los archivos locales descargados, no de documentación externa.
 
 **Rationale**: Constitución P-03 (datos reales) y spec FR-008/FR-013/FR-018.

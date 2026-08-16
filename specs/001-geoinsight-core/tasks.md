@@ -212,6 +212,13 @@ scripts/download-datasets.ps1         # descarga manual (base del bootstrap)
 
 **Purpose**: Sincronizar la experiencia implementada con FR-026..FR-042 sin alterar las reglas espaciales.
 
+- [x] T068 [FR-050] Ejecutar `BootstrapRunner` durante la inicialización de
+  singletons, antes de que Tomcat acepte conexiones, para no exponer el estado
+  transitorio de datasets aún no descargados o cargados.
+- [x] T069 [FR-051] Reintentar cada descarga hasta tres intentos configurables,
+  con espera incremental y prueba de recuperación después de un error HTTP
+  transitorio.
+
 > **Corrección de estado (2026-08-16)**: T047 queda cubierta únicamente para
 > el componente servidor mediante `PerformanceAcceptanceTest`. La medición de
 > render de navegador se identifica como T047b y sigue abierta. La marca previa

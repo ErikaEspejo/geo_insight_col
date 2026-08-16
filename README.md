@@ -21,11 +21,17 @@ fuente de verdad del comportamiento esperado.
 .\mvnw.cmd spring-boot:run     # levanta el servidor en http://localhost:8080
 ```
 
-Al arrancar, el backend:
+Al arrancar, el backend completa el bootstrap **antes de abrir el puerto 8080**:
 
-1. verifica los 5 datasets en `docs/datasets/`; si falta alguno, lo descarga
-   automáticamente de las APIs REST del SGC (primera vez);
-2. siembra la cuenta admin en `data/users.json` si no existe.
+1. verifica localmente que los 5 datasets tengan sus conteos oficiales;
+2. descarga los ausentes, corruptos o incompletos desde las APIs REST del SGC;
+3. reintenta cada descarga hasta 3 veces, con espera incremental;
+4. carga los datasets completos en memoria y siembra la cuenta admin;
+5. solo entonces empieza a aceptar conexiones. Si un dataset sigue fallando
+   tras los reintentos, arranca indicando `dataAvailable=false` para ese dominio.
+
+Los reintentos se configuran en `application.properties` mediante
+`geoinsight.download.max-attempts` y `geoinsight.download.retry-delay-ms`.
 
 ## Cuenta admin (sembrada)
 

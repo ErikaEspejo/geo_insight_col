@@ -197,6 +197,17 @@ src/test/java/co/edu/distrital/geoinsight/
 
 ## Complexity Tracking
 
+### Disponibilidad durante el arranque
+
+`BootstrapRunner` participa en la inicialización de singletons del contexto,
+antes de que el ciclo de vida de Tomcat abra el puerto. Ejecuta la siembra del
+administrador y el bootstrap completo de datasets. Esto evita una ventana en
+la que la API responda con todas las capas temporalmente no disponibles.
+Cada descarga admite un máximo configurable de intentos y una espera base
+configurable; la espera aumenta con el número de intento. Al agotarse, el
+arranque continúa con `dataAvailable=false`, preservando FR-020 sin bloquear
+indefinidamente el uso local.
+
 ### Corrección de integridad de datasets (2026-08-16)
 
 El bootstrap compara cada archivo local con el conteo oficial versionado. Si

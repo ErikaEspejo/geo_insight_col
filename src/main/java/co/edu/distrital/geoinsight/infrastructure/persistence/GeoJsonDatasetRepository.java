@@ -48,9 +48,9 @@ public class GeoJsonDatasetRepository implements DatasetRepository {
 
     /**
      * Carga eager de los cinco datasets al construir el bean, antes de que el
-     * servidor empiece a atender peticiones. Evita servir capas parcialmente
-     * cargadas durante el arranque (los ApplicationRunner corren después de que
-     * Tomcat ya escucha).
+     * servidor empiece a atender peticiones. El bootstrap completa o reintenta
+     * esta carga durante la inicialización de singletons, antes de que Tomcat
+     * empiece a escuchar (FR-050).
      */
     @PostConstruct
     public void loadAll() {

@@ -214,7 +214,20 @@ El administrador crea, edita y elimina entidades de origen GEOINSIGHT en cualqui
 - **FR-048**: La consulta por coordenada, el análisis de zona y la comparación DEBEN ofrecer una acción «Borrar» que restablezca el panel a su estado vacío y elimine del mapa los marcadores, círculos, entidades y resaltados propios del análisis, conservando las capas temáticas activas.
 - **FR-049**: La consulta puntual DEBE limitarse a una cobertura seleccionada por disponibilidad: dominios tectónicos; en su ausencia, unidades geológicas; en ausencia de ambos, el borde local del basemap de Colombia. Fuera de esa cobertura DEBE responder `insideCoverage=false` sin calcular entidades cercanas. Esta restricción NO DEBE recortar el análisis ni la comparación por radio.
 
+### Startup availability requirement
+
+- **FR-050**: El servidor NO DEBE aceptar solicitudes de usuario antes de
+  terminar la verificación, descarga cuando sea necesaria y carga de los cinco
+  datasets. Si algún dataset no puede obtenerse, el servidor puede iniciar
+  únicamente después de completar el intento de bootstrap y DEBE exponer su
+  ausencia mediante `dataAvailable=false` (FR-020).
+- **FR-051**: La descarga inicial de cada dataset DEBE reintentarse un número
+  finito y configurable de veces, con espera incremental entre intentos. Al
+  agotarlos, el bootstrap DEBE continuar y representar el dataset como no
+  disponible, sin impedir indefinidamente el arranque.
+
 ### Key Entities *(include if feature involves data)*
+
 
 - **Entidad Geocientífica**: concepto común de los cinco dominios con procedencia (SGC o GEOINSIGHT), geometría y atributos descriptivos.
 - **Movimiento en masa**: registro con tipo, subtipo y clasificación observables en el dataset SGC.
@@ -241,6 +254,10 @@ El administrador crea, edita y elimina entidades de origen GEOINSIGHT en cualqui
 - **SC-008**: El 100% de los accesos requieren autenticación y ninguna cuenta registrada obtiene rol administrador.
 - **SC-009**: El 100% de las altas y ediciones administrativas rechazan atributos fuera de lista y valores con tipo incompatible.
 - **SC-010**: Los flujos de zona, comparación y administración permiten capturar coordenadas o geometrías desde el mapa sin activar herramientas ajenas.
+
+- **SC-011**: La primera respuesta aceptada por el servidor después de iniciar
+  refleja el resultado final del bootstrap; nunca muestra los cinco datasets
+  como ausentes solo porque la descarga o carga continúa en segundo plano.
 
 ## Assumptions
 

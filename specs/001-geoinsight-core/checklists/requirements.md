@@ -38,4 +38,4 @@
 - All items pass validation; spec is ready for `/speckit.plan`.
 - Decisions deferred to data inspection (FR-013, FR-018) are explicitly framed as
   dataset-derived rules, not invented requirements.
-- Revalidated after implementation synchronization through FR-049 and SC-010.
+- Revalidated after implementation synchronization through FR-051 and SC-011.

@@ -70,4 +70,39 @@ class SgcDatasetDownloaderTest {
         ObjectMapper mapper = new ObjectMapper();
         assertThat(mapper.readTree(file.toFile()).path("features")).hasSize(3);
     }
+
+    @Test
+    void retriesAfterTransientHttpFailure() throws IOException {
+        AtomicInteger countRequests = new AtomicInteger();
+        server.createContext("/svc/0/query", exchange -> {
+            String query = exchange.getRequestURI().getQuery();
+            int status = 200;
+            String body;
+            if (query != null && query.contains("returnCountOnly=true")) {
+                if (countRequests.incrementAndGet() == 1) {
+                    status = 503;
+                    body = "{}";
+                } else {
+                    body = "{\"count\":1}";
+                }
+            } else {
+                body = "{\"features\":[{\"f1\":1}]}";
+            }
+            byte[] bytes = body.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(status, bytes.length);
+            exchange.getResponseBody().write(bytes);
+            exchange.close();
+        });
+        server.start();
+
+        String serviceUrl = "http://localhost:" + server.getAddress().getPort() + "/svc";
+        SgcDatasets.Source source = new SgcDatasets.Source("retry.geojson", serviceUrl, 0, 1, 1, Domain.VOLCAN);
+        SgcDatasetDownloader downloader = new SgcDatasetDownloader(
+                tempDir, new ObjectMapper(), HttpClient.newHttpClient(), 3, 0);
+
+        downloader.download(source);
+
+        assertThat(countRequests.get()).isEqualTo(2);
+        assertThat(tempDir.resolve("retry.geojson")).exists();
+    }
 }

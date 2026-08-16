@@ -29,10 +29,27 @@ Guía de validación de extremo a extremo. Detalles de implementación en `tasks
 ```
 
 Al arrancar el backend:
-- verifica los 5 datasets en `docs/datasets/`; si falta alguno, los descarga (primera vez);
-- siembra el admin en `data/users.json` si no existe.
+- no abre el puerto HTTP hasta completar el bootstrap;
+- verifica existencia, legibilidad y conteo oficial de los 5 datasets;
+- descarga los datasets ausentes, corruptos o incompletos;
+- reintenta cada descarga hasta `geoinsight.download.max-attempts` veces, con
+  espera incremental basada en `geoinsight.download.retry-delay-ms`;
+- carga los datos en memoria y siembra el admin antes de aceptar conexiones;
+- si agota los reintentos, arranca con `dataAvailable=false` para el dominio
+  afectado en lugar de permanecer bloqueado indefinidamente.
 
 ## Escenarios de validación
+
+### E0. Disponibilidad durante el arranque (SC-011, FR-050, FR-051)
+
+1. Retirar temporalmente un dataset local e iniciar la aplicación.
+2. Mientras se descarga, comprobar que el puerto 8080 todavía no acepta
+   conexiones.
+3. Cuando el servidor responda, iniciar sesión y consultar `/api/layers`: el
+   dataset debe aparecer cargado o como ausencia final después de agotar los
+   reintentos, nunca como ausencia transitoria.
+4. Simular un HTTP 503 inicial y verificar que un intento posterior complete la
+   descarga; `SgcDatasetDownloaderTest` automatiza este escenario.
 
 ### E1. Autenticación (SC-008, FR-021..FR-025, FR-036)
 1. Abrir `http://localhost:8080` sin sesión → redirige a `login.html`.

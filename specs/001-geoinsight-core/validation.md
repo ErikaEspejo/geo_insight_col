@@ -19,6 +19,16 @@ exceden los presupuestos:
 Los tiempos excluyen el arranque de Spring y no sustituyen la medición del
 render del navegador exigida por SC-001.
 
+## Evidencia de bootstrap FR-050/FR-051
+
+- `SgcDatasetDownloaderTest.retriesAfterTransientHttpFailure` provoca un HTTP
+  503 en el primer intento y verifica descarga correcta en el segundo.
+- El arranque manual del 2026-08-16 no aceptó conexiones hasta terminar el
+  bootstrap; la primera respuesta de `/api/layers` informó los conteos
+  6826/4866/7461/3/61 con `dataAvailable=true` en los cinco dominios.
+- Configuración verificada: 3 intentos totales y espera base de 1000 ms; la
+  espera crece linealmente por número de intento.
+
 ## Validación visual pendiente
 
 1. Ejecutar `mvn spring-boot:run` e iniciar sesión.

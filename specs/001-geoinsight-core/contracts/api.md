@@ -6,6 +6,14 @@ Formato JSON. Errores: `{ "message": "..." }` con el código HTTP correspondient
 
 ## Autenticación
 
+### Disponibilidad del servidor
+
+El puerto HTTP solo se abre después de completar la verificación, las descargas
+con reintentos y la carga inicial de datasets (FR-050, FR-051). Por tanto, una
+conexión aceptada nunca observa el estado transitorio del bootstrap. Si un
+dataset continúa ausente después de agotar los intentos, `GET /api/layers`
+informa `dataAvailable=false` para ese dominio (FR-020).
+
 Todo acceso a la aplicación exige sesión (FR-021). Sin sesión, los navegadores son redirigidos a `login.html` y las APIs responden 401.
 
 ### `POST /api/auth/register`

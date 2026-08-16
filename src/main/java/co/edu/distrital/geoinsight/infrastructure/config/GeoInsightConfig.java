@@ -28,7 +28,9 @@ public class GeoInsightConfig {
     }
 
     @Bean
-    SgcDatasetDownloader sgcDatasetDownloader(Path datasetsDir, ObjectMapper objectMapper) {
-        return new SgcDatasetDownloader(datasetsDir, objectMapper);
+    SgcDatasetDownloader sgcDatasetDownloader(Path datasetsDir, ObjectMapper objectMapper,
+            @Value("${geoinsight.download.max-attempts:3}") int maxAttempts,
+            @Value("${geoinsight.download.retry-delay-ms:1000}") long retryDelayMillis) {
+        return new SgcDatasetDownloader(datasetsDir, objectMapper, maxAttempts, retryDelayMillis);
     }
 }

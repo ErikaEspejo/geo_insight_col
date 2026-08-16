@@ -35,15 +35,37 @@ public class SgcDatasetDownloader {
     private final Path datasetsDir;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
+    private final int maxAttempts;
+    private final long retryDelayMillis;
 
     public SgcDatasetDownloader(Path datasetsDir, ObjectMapper objectMapper) {
-        this(datasetsDir, objectMapper, HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build());
+        this(datasetsDir, objectMapper, 3, 1000);
+    }
+
+    public SgcDatasetDownloader(Path datasetsDir, ObjectMapper objectMapper,
+                                int maxAttempts, long retryDelayMillis) {
+        this(datasetsDir, objectMapper,
+                HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build(),
+                maxAttempts, retryDelayMillis);
     }
 
     SgcDatasetDownloader(Path datasetsDir, ObjectMapper objectMapper, HttpClient httpClient) {
+        this(datasetsDir, objectMapper, httpClient, 3, 0);
+    }
+
+    SgcDatasetDownloader(Path datasetsDir, ObjectMapper objectMapper, HttpClient httpClient,
+                         int maxAttempts, long retryDelayMillis) {
+        if (maxAttempts < 1) {
+            throw new IllegalArgumentException("maxAttempts debe ser mayor o igual a 1");
+        }
+        if (retryDelayMillis < 0) {
+            throw new IllegalArgumentException("retryDelayMillis no puede ser negativo");
+        }
         this.datasetsDir = datasetsDir;
         this.objectMapper = objectMapper;
         this.httpClient = httpClient;
+        this.maxAttempts = maxAttempts;
+        this.retryDelayMillis = retryDelayMillis;
     }
 
     /** Descarga todos los datasets ausentes. Retorna los dominios que quedaron sin datos. */
@@ -56,7 +78,32 @@ public class SgcDatasetDownloader {
         return missing;
     }
 
-    void download(SgcDatasets.Source source) {        try {
+    void download(SgcDatasets.Source source) {
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                downloadOnce(source);
+                return;
+            } catch (IOException e) {
+                if (attempt == maxAttempts) {
+                    log.error("No se pudo descargar {} después de {} intentos: {}",
+                            source.fileName(), maxAttempts, e.getMessage());
+                    return;
+                }
+                long delay = retryDelayMillis * attempt;
+                log.warn("Falló la descarga de {} (intento {}/{}): {}. Reintento en {} ms",
+                        source.fileName(), attempt, maxAttempts, e.getMessage(), delay);
+                if (!waitBeforeRetry(delay, source.fileName())) {
+                    return;
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.error("Descarga interrumpida para {}", source.fileName());
+                return;
+            }
+        }
+    }
+
+    private void downloadOnce(SgcDatasets.Source source) throws IOException, InterruptedException {
             long total = featureCount(source);
             List<JsonNode> features = new ArrayList<>();
             int offset = 0;
@@ -71,8 +118,16 @@ public class SgcDatasetDownloader {
             }
             writeFeatureCollection(features, datasetsDir.resolve(source.fileName()));
             log.info("Descargado y verificado {}: {} entidades", source.fileName(), features.size());
-        } catch (IOException | InterruptedException e) {
-            log.error("No se pudo descargar {}: {}", source.fileName(), e.getMessage());
+    }
+
+    private boolean waitBeforeRetry(long delayMillis, String fileName) {
+        try {
+            Thread.sleep(delayMillis);
+            return true;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Espera de reintento interrumpida para {}", fileName);
+            return false;
         }
     }
 

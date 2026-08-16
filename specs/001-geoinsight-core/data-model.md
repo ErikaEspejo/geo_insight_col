@@ -88,6 +88,14 @@ La metadata de cada dominio expone: nombre legible, geometría admitida (punto/l
 
 ## Persistencia
 
+### Estado de bootstrap
+
+No se introduce una entidad de dominio para el bootstrap: es estado técnico de
+infraestructura. Antes de abrir el servidor, `BootstrapRunner` coordina la
+siembra, validación, descarga con reintentos y recarga del repositorio. Una vez
+agotados los intentos, la ausencia se representa mediante la metadata existente
+`dataAvailable=false`; no se inventa un estado geocientífico nuevo.
+
 | Dato | Archivo | Rol |
 |---|---|---|
 | Datasets SGC | `docs/datasets/*.geojson` | Solo lectura, auto-descarga en bootstrap |
