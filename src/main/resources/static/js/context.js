@@ -145,4 +145,8 @@
   };
 
   ui.$('context-button').addEventListener('click', () => runContext(false));
+  ui.$('context-clear').addEventListener('click', () => {
+    GeoInsightMap.clearContext();
+    result.innerHTML = '<span class="empty">Aún no has realizado una consulta.</span>';
+  });
 })();

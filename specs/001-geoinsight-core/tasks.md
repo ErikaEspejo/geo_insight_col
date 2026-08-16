@@ -225,6 +225,8 @@ scripts/download-datasets.ps1         # descarga manual (base del bootstrap)
 - [x] T061 [US2] Mover el selector de capas a un control flotante en la esquina inferior derecha del mapa, con icono convencional de capas apiladas, etiqueta «Capas», desplegable que abre hacia arriba y cierre por clic fuera o Escape, conservando tooltip, etiqueta accesible, foco visible y estado activo.
 - [x] T062 [US2] Eliminar la herramienta lateral «Explorar mapa» y su panel; la lista de capas queda únicamente en el control flotante y la ayuda se actualiza a «Capas del mapa».
 - [x] T063 [US2] Inicializar el panel contextual colapsado y sin módulo activo, sincronizando chevrón y etiqueta del botón de colapso con el estado cerrado.
+- [x] T064 [US2/US4/US5] Vista previa de entidad al pasar el cursor: tooltip de Leaflet en líneas/polígonos y hit-testing en puntos canvas (mismo tooltip que el clic) en `static/js/map.js` + `css/styles.css`.
+- [x] T065 [US3/US4/US5] Acción «Borrar» en consulta por coordenada, análisis de zona y comparación: restablece el panel a su estado vacío y limpia los overlays propios del análisis en `index.html`, `context.js`, `zone.js`, `compare.js`.
 
 ---
 

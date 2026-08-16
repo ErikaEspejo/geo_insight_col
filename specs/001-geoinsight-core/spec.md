@@ -54,6 +54,7 @@ El usuario explora los cinco dominios geocientíficos como capas diferenciadas s
 11. **Given** el mapa visible, **When** el usuario ubica el control de capas en la esquina inferior derecha, **Then** encuentra el icono convencional de capas apiladas con la etiqueta “Capas” y, al pulsarlo, el selector se abre hacia arriba sin quedar oculto por el panel de entidad.
 12. **Given** el selector de capas abierto, **When** el usuario hace clic fuera del control o presiona Escape, **Then** el selector se cierra y el estado expandido del botón se restablece.
 13. **Given** la aplicación recién abierta, **When** el usuario aún no elige una herramienta, **Then** el panel contextual permanece colapsado y no muestra ningún módulo vacío; al elegir una herramienta se abre el módulo correspondiente.
+14. **Given** el mapa con entidades visibles, **When** el usuario pasa el cursor sobre una entidad, **Then** aparece una vista previa con su nombre, procedencia y atributos principales; al hacer clic se fija el detalle completo en el panel.
 
 ---
 
@@ -76,6 +77,7 @@ El usuario ingresa o selecciona una coordenada y el sistema responde qué contex
 7. **Given** una consulta ejecutada desde el formulario, **When** llegan los resultados, **Then** el mapa marca la ubicación consultada con un símbolo propio, resalta los contenedores y los elementos más cercanos (incluido el volcán) y ajusta la vista para mostrarlos todos, sin superar un zoom máximo.
 8. **Given** un clic en el mapa dentro del módulo, **When** se ejecuta la consulta, **Then** el mapa conserva la vista natural sin cambios bruscos de zoom.
 9. **Given** un dominio sin información, **When** se presentan los resultados, **Then** se muestra un mensaje legible sin valores `null`, estructuras JSON ni identificadores vacíos.
+10. **Given** una consulta ya presentada, **When** el usuario pulsa «Borrar consulta», **Then** el panel vuelve a su estado vacío y el mapa deja de mostrar el marcador y los elementos resaltados de esa consulta.
 
 ---
 
@@ -95,6 +97,7 @@ El usuario define una coordenada central y un radio; el sistema produce una cara
 4. **Given** resultados presentados, **When** se muestran, **Then** no incluyen conclusiones de riesgo, amenaza, peligrosidad ni seguridad.
 5. **Given** una zona válida, **When** se analiza, **Then** el mapa representa el centro y el radio y ajusta el viewport a la zona completa.
 6. **Given** el formulario de zona, **When** el usuario activa “Elegir punto en el mapa” y hace clic, **Then** longitud y latitud se completan sin ejecutar otro módulo.
+7. **Given** un análisis ya presentado, **When** el usuario pulsa «Borrar análisis», **Then** el panel vuelve a su estado vacío y el mapa elimina el centro, el radio y las entidades resaltadas de la zona.
 
 ---
 
@@ -114,6 +117,7 @@ El usuario selecciona dos coordenadas y un radio común de análisis; el sistema
 4. **Given** resultados disponibles, **When** se presenta cada dominio, **Then** se muestran lado a lado conteos, distribuciones, entidades centrales y vecinos con distancia según los casos de uso existentes.
 5. **Given** un dominio sin registros, un dataset ausente o un atributo vacío, **When** se presenta el resultado, **Then** esos estados se distinguen explícitamente.
 6. **Given** los formularios A/B, **When** el usuario elige cada punto en el mapa, **Then** solo se completan los campos del destino seleccionado.
+7. **Given** una comparación ya presentada, **When** el usuario pulsa «Borrar comparación», **Then** el panel vuelve a su estado vacío y el mapa elimina los centros A/B y sus radios.
 
 ---
 
@@ -204,6 +208,8 @@ El administrador crea, edita y elimina entidades de origen GEOINSIGHT en cualqui
 - **FR-044**: Las distancias DEBEN mostrarse en metros con un decimal para distancias menores a 1 km y en kilómetros con un decimal para distancias de 1 km o más, con separador decimal en español.
 - **FR-045**: La consulta por coordenada DEBE marcar la ubicación consultada con un símbolo propio distinto de las entidades, resaltar las geometrías contenedoras y los elementos más cercanos (falla, movimiento en masa y volcán) y ajustar la vista al consultar desde el formulario para que queden visibles todos los elementos resaltados, sin superar un zoom máximo que conserve el contexto; el clic en el mapa NO DEBE alterar bruscamente la vista.
 - **FR-046**: Los resultados DEBEN priorizar los nombres descriptivos del dataset y mostrar los identificadores técnicos como información secundaria; la ausencia de información por dominio DEBE presentarse con mensajes legibles y no inferir riesgo, amenaza o peligrosidad (FR-012).
+- **FR-047**: Las capas temáticas y los resultados de zona y comparación DEBEN mostrar una vista previa de la entidad al pasar el cursor (nombre, procedencia y atributos principales), sin reemplazar el detalle completo que el clic fija en el panel.
+- **FR-048**: La consulta por coordenada, el análisis de zona y la comparación DEBEN ofrecer una acción «Borrar» que restablezca el panel a su estado vacío y elimine del mapa los marcadores, círculos, entidades y resaltados propios del análisis, conservando las capas temáticas activas.
 
 ### Key Entities *(include if feature involves data)*
 

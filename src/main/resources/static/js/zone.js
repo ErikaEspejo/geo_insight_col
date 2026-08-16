@@ -251,6 +251,12 @@
   }
 
   ui.$('zone-button').addEventListener('click', runZone);
+  ui.$('zone-clear').addEventListener('click', () => {
+    lastData = null;
+    filters = {};
+    GeoInsightMap.clearZoneAnalysis();
+    result.innerHTML = '<span class="empty">Aún no hay un análisis.</span>';
+  });
   ui.bindMapCoordinatePicker('zone-pick', 'zone');
   ui.$('zone-radius').addEventListener('keydown', (event) => {
     if (event.key === 'Enter') runZone();

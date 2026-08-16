@@ -192,6 +192,10 @@
   }
 
   ui.$('compare-button').addEventListener('click', runCompare);
+  ui.$('compare-clear').addEventListener('click', () => {
+    GeoInsightMap.clearZoneCircles();
+    result.innerHTML = '<span class="empty">Aún no hay una comparación.</span>';
+  });
   ui.bindMapCoordinatePicker('compare-a-pick', 'compare-a');
   ui.bindMapCoordinatePicker('compare-b-pick', 'compare-b');
   ui.$('compare-radius').addEventListener('keydown', (event) => {

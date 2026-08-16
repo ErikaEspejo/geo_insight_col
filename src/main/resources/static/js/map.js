@@ -88,7 +88,13 @@
         radius: 7, color: '#fff', weight: 2,
         fillColor: domainStyle(feature.properties._domain).color, fillOpacity: 1
       }),
-      onEachFeature: (feature, layer) => layer.on('click', () => showEntity(feature))
+      onEachFeature: (feature, layer) => {
+        layer.on('click', () => showEntity(feature));
+        layer.bindTooltip(
+          entityTooltipHtml(feature),
+          { sticky: true, direction: 'top', className: 'entity-tooltip' }
+        );
+      }
     });
     if (state.activeTool === 'admin') adminEntitiesLayer.addTo(map);
   }
@@ -251,7 +257,11 @@
         pane: style.geometry === 'polygon' ? 'geoPolygons' : 'geoLines',
         style: highlight
           ? { color: '#0b3b66', weight: 3.2, fillColor: style.color, fillOpacity: 0.4 }
-          : { color: style.color, weight: style.weight, fillOpacity: style.fillOpacity }
+          : { color: style.color, weight: style.weight, fillOpacity: style.fillOpacity },
+        onEachFeature: (feature, child) => child.bindTooltip(
+          entityTooltipHtml(feature),
+          { sticky: true, direction: 'top', className: 'entity-tooltip' }
+        )
       });
       layer.on('click', (event) => showEntity(event.propagatedFrom.feature));
     }
@@ -332,17 +342,31 @@
     if (features.length === 0) return;
     contextState.nearest = L.geoJSON({ type: 'FeatureCollection', features }, {
       pane: 'contextNearest',
-      style: (feature) => feature.properties._domain === 'FALLA_GEOLOGICA'
-        ? { color: '#0b3b66', weight: 3.5, opacity: 0.95 }
-        : { color: '#e45756', weight: 2.5, opacity: 0.95, fillColor: '#e45756', fillOpacity: 0.35 },
+      style: (feature) => {
+        const color = domainStyle(feature.properties._domain).color;
+        return feature.properties._domain === 'FALLA_GEOLOGICA'
+          ? { color, weight: 3.5, opacity: 0.95 }
+          : { color, weight: 2.5, opacity: 0.95, fillColor: color, fillOpacity: 0.35 };
+      },
       pointToLayer: (feature, latlng) => {
-        const isVolcano = feature.properties._domain === 'VOLCAN';
+        if (feature.properties._domain === 'VOLCAN') {
+          return L.marker(latlng, {
+            icon: L.divIcon({
+              className: 'context-volcano-icon',
+              iconSize: [16, 16],
+              iconAnchor: [8, 9]
+            }),
+            interactive: false,
+            keyboard: false
+          });
+        }
         return L.circleMarker(latlng, {
-          radius: 9,
+          radius: 6,
           color: '#ffffff',
           weight: 2.5,
-          fillColor: isVolcano ? '#d97706' : '#e45756',
-          fillOpacity: 1
+          fillColor: domainStyle(feature.properties._domain).color,
+          fillOpacity: 0.92,
+          interactive: false
         });
       },
       interactive: false
@@ -529,7 +553,11 @@
         color: style.color,
         weight: style.weight,
         fillOpacity: style.fillOpacity
-      }
+      },
+      onEachFeature: (feature, child) => child.bindTooltip(
+        entityTooltipHtml(feature),
+        { sticky: true, direction: 'top', className: 'entity-tooltip' }
+      )
     });
     layer.on('click', (event) => showEntity(event.propagatedFrom.feature));
     return layer;
@@ -550,6 +578,23 @@
       .filter(([key, value]) => value !== null && value !== undefined && value !== ''
         && !PROVIDER_ATTRIBUTES.has(key))
       .map(([key, value]) => [ATTRIBUTE_LABELS[key] || key, value]);
+  }
+
+  function entityTooltipHtml(feature) {
+    if (!feature?.properties) return '';
+    const origin = feature.properties.origin || feature.origin;
+    const originLabel = origin === 'GEOINSIGHT' ? 'GEOINSIGHT' : 'SGC';
+    const title = ui.entityName({ id: feature.id, attributes: feature.properties });
+    let html = `<div class="entity-tooltip-head"><span class="badge ${originLabel}">${originLabel}</span><strong>${ui.escapeHtml(title)}</strong></div>`;
+    const { origin: _origin, _domain: _internalDomain, ...attributes } = feature.properties;
+    const rows = displayAttributes(attributes);
+    html += '<dl class="entity-tooltip-attrs">';
+    rows.slice(0, 5).forEach(([label, value]) => {
+      html += `<dt>${ui.escapeHtml(label)}</dt><dd>${ui.escapeHtml(String(value))}</dd>`;
+    });
+    html += '</dl>';
+    if (rows.length > 5) html += '<div class="entity-tooltip-more">Haz clic para ver todos los atributos.</div>';
+    return html;
   }
 
   function showEntity(feature) {
@@ -932,6 +977,61 @@
     return null;
   }
 
+  function canvasFeatureAt(containerPoint) {
+    for (const domain of state.active) {
+      const group = state.groups[domain];
+      if (!group) continue;
+      let found = null;
+      group.eachLayer((layer) => {
+        if (!found && typeof layer.featureAt === 'function' && map.hasLayer(layer)) {
+          found = layer.featureAt(containerPoint);
+        }
+      });
+      if (found) return found;
+    }
+    for (const layer of Object.values(zoneEntitiesLayers)) {
+      if (typeof layer.featureAt === 'function' && map.hasLayer(layer)) {
+        const found = layer.featureAt(containerPoint);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+
+  function bindEntityHover() {
+    let hoveredFeature = null;
+    let hoverTooltip = null;
+    map.on('mousemove', (event) => {
+      const found = canvasFeatureAt(event.containerPoint);
+      if (found === hoveredFeature) return;
+      hoveredFeature = found;
+      if (hoverTooltip) {
+        map.closeTooltip(hoverTooltip);
+        hoverTooltip = null;
+      }
+      if (!found?.geometry || found.geometry.type !== 'Point') return;
+      const [lon, lat] = found.geometry.coordinates;
+      hoverTooltip = L.tooltip({ sticky: true, direction: 'top', className: 'entity-tooltip' })
+        .setLatLng([lat, lon])
+        .setContent(entityTooltipHtml(found))
+        .addTo(map);
+    });
+    map.on('click', () => {
+      hoveredFeature = null;
+      if (hoverTooltip) {
+        map.closeTooltip(hoverTooltip);
+        hoverTooltip = null;
+      }
+    });
+    map.on('zoomend', () => {
+      hoveredFeature = null;
+      if (hoverTooltip) {
+        map.closeTooltip(hoverTooltip);
+        hoverTooltip = null;
+      }
+    });
+  }
+
   async function init() {
     const me = await api.get('/api/auth/me');
     document.getElementById('account-name').textContent = me.username;
@@ -963,6 +1063,7 @@
         window.GeoInsight.onMapClick(event.latlng.lng, event.latlng.lat);
       }
     });
+    bindEntityHover();
 
     const [basemap, layers] = await Promise.all([
       api.get('/api/basemap/colombia'),

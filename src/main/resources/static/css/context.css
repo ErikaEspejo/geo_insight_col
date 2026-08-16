@@ -21,6 +21,8 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
+  overflow: hidden;
   padding: 10px 12px;
   border: 1px solid #e3e8ef;
   border-radius: 9px;
@@ -54,13 +56,15 @@
 }
 
 .context-card-value {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
   font-size: 16px;
   font-weight: 800;
   color: #172033;
   letter-spacing: -.2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .context-card-value.context-card-empty {
@@ -71,11 +75,13 @@
 }
 
 .context-card-meta {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
   font-size: 11px;
   color: #667085;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .context-card-desc {
@@ -83,12 +89,22 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  overflow-wrap: anywhere;
   font-size: 11px;
   line-height: 1.45;
   color: #475467;
 }
 
 .context-location-wrapper {
+  pointer-events: none;
+}
+
+.context-volcano-icon {
+  width: 16px;
+  height: 16px;
+  background: #f47a32;
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  filter: drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1.5px #fff);
   pointer-events: none;
 }
 

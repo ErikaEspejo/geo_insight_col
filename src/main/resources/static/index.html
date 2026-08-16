@@ -59,6 +59,7 @@
           <p class="hint">Ingresa una coordenada o haz clic sobre el mapa.</p>
           <div class="form-grid"><div><label for="context-lon">Longitud</label><input id="context-lon" type="number" step="any" placeholder="-74.0700"></div><div><label for="context-lat">Latitud</label><input id="context-lat" type="number" step="any" placeholder="4.7100"></div></div>
           <button id="context-button" class="primary full-width" type="button">Consultar ubicación</button>
+          <button id="context-clear" class="secondary full-width" type="button">Borrar consulta</button>
           <div id="context-result" class="result-box"><span class="empty">Aún no has realizado una consulta.</span></div>
         </section>
 
@@ -69,6 +70,7 @@
           <button id="zone-pick" class="map-pick-button" type="button"><span aria-hidden="true">⌖</span> Elegir punto en el mapa</button>
           <label for="zone-radius">Radio de análisis (metros)</label><input id="zone-radius" type="number" min="1" step="any" placeholder="10000">
           <button id="zone-button" class="primary full-width" type="button">Analizar zona</button>
+          <button id="zone-clear" class="secondary full-width" type="button">Borrar análisis</button>
           <div id="zone-result" class="result-box"><span class="empty">Aún no hay un análisis.</span></div>
         </section>
 
@@ -80,6 +82,7 @@
           <div class="zone-label zone-b"><span>B</span> Zona B</div><div class="form-grid"><div><label for="compare-b-lon">Longitud</label><input id="compare-b-lon" type="number" step="any" placeholder="-75.0000"></div><div><label for="compare-b-lat">Latitud</label><input id="compare-b-lat" type="number" step="any" placeholder="5.0000"></div></div>
           <button id="compare-b-pick" class="map-pick-button" type="button"><span aria-hidden="true">⌖</span> Elegir Zona B en el mapa</button>
           <button id="compare-button" class="primary full-width" type="button">Comparar zonas</button>
+          <button id="compare-clear" class="secondary full-width" type="button">Borrar comparación</button>
           <div id="compare-result" class="result-box compare-result"><span class="empty">Aún no hay una comparación.</span></div>
         </section>
 
