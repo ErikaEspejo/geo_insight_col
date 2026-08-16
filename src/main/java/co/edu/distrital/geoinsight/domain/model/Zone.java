@@ -12,8 +12,8 @@ public record Zone(Coordinate center, double radiusMeters) {
 
     public Zone {
         Objects.requireNonNull(center, "centro requerido");
-        if (Double.isNaN(radiusMeters) || radiusMeters <= 0.0) {
-            throw new IllegalArgumentException("El radio debe ser un valor positivo");
+        if (!Double.isFinite(radiusMeters) || radiusMeters <= 0.0) {
+            throw new IllegalArgumentException("El radio debe ser un valor finito y positivo");
         }
     }
 

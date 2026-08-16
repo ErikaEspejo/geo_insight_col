@@ -69,11 +69,12 @@ class AnalysisWebTest {
                 .andReturn();
         JsonNode body = objectMapper.readTree(result.getResponse().getContentAsString());
         assertThat(body.path("coordinate").path("lon").asDouble()).isEqualTo(-55.0);
+        assertThat(body.path("insideCoverage").asBoolean()).isFalse();
         assertThat(body.path("geologicalUnits")).isEmpty();
         assertThat(body.path("tectonicDomains")).isEmpty();
-        assertThat(body.path("nearestFault").path("distanceMeters").asDouble()).isGreaterThan(1_000_000);
-        assertThat(body.path("nearestMassMovement").path("distanceMeters").asDouble()).isGreaterThan(1_000_000);
-        assertThat(body.path("nearestVolcano").path("distanceMeters").asDouble()).isGreaterThan(1_000_000);
+        assertThat(body.path("nearestFault").isNull()).isTrue();
+        assertThat(body.path("nearestMassMovement").isNull()).isTrue();
+        assertThat(body.path("nearestVolcano").isNull()).isTrue();
     }
 
     @Test
@@ -84,6 +85,7 @@ class AnalysisWebTest {
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode body = objectMapper.readTree(result.getResponse().getContentAsString());
+        assertThat(body.path("insideCoverage").asBoolean()).isTrue();
         assertThat(body.path("geologicalUnits").path(0).path("origin").asText()).isEqualTo("SGC");
         assertThat(body.path("nearestVolcano").path("entity").path("attributes").path("NombreVolcan").asText())
                 .isEqualTo("Volcan Santa Leticia");
@@ -136,9 +138,9 @@ class AnalysisWebTest {
     @Test
     void zoneComparisonShowsSameIndicatorsSideBySide() throws Exception {
         MvcResult result = mockMvc.perform(post("/api/zones/compare").session(session)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"zoneA\":{\"lon\":-76.166495,\"lat\":2.232286,\"radiusMeters\":30000},"
-                                + "\"zoneB\":{\"lon\":-74.07,\"lat\":4.71,\"radiusMeters\":30000}}"))
+                .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"zoneA\":{\"lon\":-76.166495,\"lat\":2.232286},"
+                                + "\"zoneB\":{\"lon\":-74.07,\"lat\":4.71},\"radiusMeters\":30000}"))
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode body = objectMapper.readTree(result.getResponse().getContentAsString());
@@ -148,12 +150,27 @@ class AnalysisWebTest {
         assertThat(body.path("zoneB").path("nearestFault").path("distanceMeters").isNumber()).isTrue();
         assertThat(body.path("zoneA").path("nearestVolcano").path("entity").path("attributes")
                 .has("NombreVolcan")).isTrue();
-        assertThat(body.path("zoneA").path("centerGeologicalUnits").isArray()).isTrue();
-        assertThat(body.path("zoneB").path("centerTectonicDomains").isArray()).isTrue();
+        assertThat(body.path("zoneA").has("centerGeologicalUnits")).isFalse();
+        assertThat(body.path("zoneB").has("centerTectonicDomains")).isFalse();
         assertThat(body.path("zoneA").path("faults").path("dataAvailable").asBoolean()).isTrue();
         List<String> zoneAFields = fieldNames(body.path("zoneA"));
         List<String> zoneBFields = fieldNames(body.path("zoneB"));
         assertThat(zoneAFields).containsExactlyElementsOf(zoneBFields);
+    }
+
+    @Test
+    void zoneComparisonRequiresOneCommonRadius() throws Exception {
+        mockMvc.perform(post("/api/zones/compare").session(session)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"zoneA\":{\"lon\":-76.0,\"lat\":2.0},"
+                                + "\"zoneB\":{\"lon\":-74.0,\"lat\":4.0}}"))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(post("/api/zones/compare").session(session)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"zoneA\":{\"lon\":-76.0,\"lat\":2.0,\"radiusMeters\":1000},"
+                                + "\"zoneB\":{\"lon\":-74.0,\"lat\":4.0,\"radiusMeters\":2000}}"))
+                .andExpect(status().isBadRequest());
     }
 
     private List<String> fieldNames(JsonNode node) {

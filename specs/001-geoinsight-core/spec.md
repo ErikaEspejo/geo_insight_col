@@ -53,7 +53,7 @@ El usuario explora los cinco dominios geocientíficos como capas diferenciadas s
 10. **Given** una entidad puntual seleccionada, **When** se abre su detalle, **Then** etiquetas y valores permanecen legibles sin fragmentarse carácter por carácter ni exigir desplazamiento horizontal innecesario.
 11. **Given** el mapa visible, **When** el usuario ubica el control de capas en la esquina inferior derecha, **Then** encuentra el icono convencional de capas apiladas con la etiqueta “Capas” y, al pulsarlo, el selector se abre hacia arriba sin quedar oculto por el panel de entidad.
 12. **Given** el selector de capas abierto, **When** el usuario hace clic fuera del control o presiona Escape, **Then** el selector se cierra y el estado expandido del botón se restablece.
-13. **Given** la aplicación recién abierta, **When** el usuario aún no elige una herramienta, **Then** el panel contextual permanece colapsado y no muestra ningún módulo vacío; al elegir una herramienta se abre el módulo correspondiente.
+13. **Given** la aplicación recién abierta, **When** el usuario aún no elige otra herramienta, **Then** el panel contextual permanece colapsado con «Buscar y filtrar» como módulo predeterminado; al expandirlo nunca se muestra un panel vacío.
 14. **Given** el mapa con entidades visibles, **When** el usuario pasa el cursor sobre una entidad, **Then** aparece una vista previa con su nombre, procedencia y atributos principales; al hacer clic se fija el detalle completo en el panel.
 
 ---
@@ -78,6 +78,8 @@ El usuario ingresa o selecciona una coordenada y el sistema responde qué contex
 8. **Given** un clic en el mapa dentro del módulo, **When** se ejecuta la consulta, **Then** el mapa conserva la vista natural sin cambios bruscos de zoom.
 9. **Given** un dominio sin información, **When** se presentan los resultados, **Then** se muestra un mensaje legible sin valores `null`, estructuras JSON ni identificadores vacíos.
 10. **Given** una consulta ya presentada, **When** el usuario pulsa «Borrar consulta», **Then** el panel vuelve a su estado vacío y el mapa deja de mostrar el marcador y los elementos resaltados de esa consulta.
+11. **Given** una consulta puntual, **When** se determina su cobertura, **Then** se usa primero el dataset disponible de dominios tectónicos, en su ausencia el de unidades geológicas y, si ambos están ausentes, el borde local del basemap de Colombia.
+12. **Given** una coordenada fuera de la cobertura seleccionada por esa cascada, **When** se consulta, **Then** la respuesta exitosa indica `insideCoverage=false`, no calcula vecinos y la interfaz informa la ausencia de cobertura.
 
 ---
 
@@ -114,7 +116,7 @@ El usuario selecciona dos coordenadas y un radio común de análisis; el sistema
 1. **Given** dos coordenadas y un radio común, **When** se compara, **Then** se muestran los mismos indicadores para ambas zonas, lado a lado.
 2. **Given** una zona con más registros que la otra, **When** se comparan, **Then** el sistema solo afirma diferencias descriptivas (cantidades, distancias) y nunca diferencias de riesgo o seguridad.
 3. **Given** una comparación válida, **When** se presenta, **Then** los centros A/B y sus radios se diferencian visualmente y el viewport incluye ambas zonas completas.
-4. **Given** resultados disponibles, **When** se presenta cada dominio, **Then** se muestran lado a lado conteos, distribuciones, entidades centrales y vecinos con distancia según los casos de uso existentes.
+4. **Given** resultados disponibles, **When** se presenta cada dominio, **Then** se muestran lado a lado conteos, distribuciones, entidades dentro o intersectadas por el radio y el vecino más cercano entre esas mismas entidades.
 5. **Given** un dominio sin registros, un dataset ausente o un atributo vacío, **When** se presenta el resultado, **Then** esos estados se distinguen explícitamente.
 6. **Given** los formularios A/B, **When** el usuario elige cada punto en el mapa, **Then** solo se completan los campos del destino seleccionado.
 7. **Given** una comparación ya presentada, **When** el usuario pulsa «Borrar comparación», **Then** el panel vuelve a su estado vacío y el mapa elimina los centros A/B y sus radios.
@@ -192,7 +194,7 @@ El administrador crea, edita y elimina entidades de origen GEOINSIGHT en cualqui
 - **FR-028**: Los resultados filtrados DEBEN listarse por entidad y permitir enfocar la geometría seleccionada en el mapa.
 - **FR-029**: La selección de coordenadas desde el mapa DEBE estar ligada explícitamente al formulario que la solicita; la consulta puntual automática solo opera en su módulo.
 - **FR-030**: El análisis y la comparación DEBEN representar centros y radios, reemplazar la visualización previa y ajustar el viewport a las zonas analizadas.
-- **FR-031**: La comparación DEBE reutilizar análisis de zona y contexto central para presentar indicadores equivalentes, nombres y distancias, distinguiendo cero, ausencia de atributo y dataset no disponible.
+- **FR-031**: La comparación DEBE reutilizar el análisis de zona para presentar indicadores equivalentes, nombres y distancias exclusivamente de entidades dentro o intersectadas por cada radio, distinguiendo cero, ausencia de atributo y dataset no disponible.
 - **FR-032**: Administración DEBE aceptar solo atributos descriptivos permitidos y tipos escalares observados en el dataset; los metadatos técnicos del proveedor y campos sin tipo observable NO DEBEN capturarse manualmente.
 - **FR-033**: La geometría GEOINSIGHT DEBE poder dibujarse en el mapa de acuerdo con el tipo principal del dominio y continuar validándose en backend.
 - **FR-034**: Administración DEBE mantener visibles las entidades GEOINSIGHT existentes, diferenciarlas por dominio y confirmar su eliminación mediante un modal de la aplicación.
@@ -203,13 +205,14 @@ El administrador crea, edita y elimina entidades de origen GEOINSIGHT en cualqui
 - **FR-039**: El detalle de una entidad DEBE adaptar la distribución de etiquetas y valores al ancho disponible para conservar su legibilidad.
 - **FR-040**: El control flotante de capas DEBE ubicarse en la esquina inferior derecha del mapa, ser compacto, combinar el icono convencional de capas apiladas con la etiqueta “Capas” y mantener tooltip, etiqueta accesible y estados de interacción sin alterar su operación.
 - **FR-041**: El selector de capas DEBE abrirse hacia arriba sobre el control, contener la misma lista de capas por dominio y DEBE cerrarse con un clic fuera del control o con la tecla Escape; la herramienta lateral “Explorar mapa” NO DEBE existir porque el control flotante es el único punto de activación de capas.
-- **FR-042**: El panel contextual DEBE iniciar colapsado y sin módulo activo; al elegir una herramienta DEBE abrirse con el módulo correspondiente y el estado visual del botón de colapso DEBE coincidir con el panel.
+- **FR-042**: El panel contextual DEBE iniciar colapsado con «Buscar y filtrar» como módulo predeterminado; al expandirse NO DEBE mostrar un panel vacío y el estado visual del botón de colapso DEBE coincidir con el panel.
 - **FR-043**: La consulta por coordenada DEBE presentar los resultados en tres secciones diferenciadas (Resultado, Contexto geológico y Elementos cercanos), cada dominio en una tarjeta compacta, sin mezclar contenedores con elementos próximos.
 - **FR-044**: Las distancias DEBEN mostrarse en metros con un decimal para distancias menores a 1 km y en kilómetros con un decimal para distancias de 1 km o más, con separador decimal en español.
 - **FR-045**: La consulta por coordenada DEBE marcar la ubicación consultada con un símbolo propio distinto de las entidades, resaltar las geometrías contenedoras y los elementos más cercanos (falla, movimiento en masa y volcán) y ajustar la vista al consultar desde el formulario para que queden visibles todos los elementos resaltados, sin superar un zoom máximo que conserve el contexto; el clic en el mapa NO DEBE alterar bruscamente la vista.
 - **FR-046**: Los resultados DEBEN priorizar los nombres descriptivos del dataset y mostrar los identificadores técnicos como información secundaria; la ausencia de información por dominio DEBE presentarse con mensajes legibles y no inferir riesgo, amenaza o peligrosidad (FR-012).
 - **FR-047**: Las capas temáticas y los resultados de zona y comparación DEBEN mostrar una vista previa de la entidad al pasar el cursor (nombre, procedencia y atributos principales), sin reemplazar el detalle completo que el clic fija en el panel.
 - **FR-048**: La consulta por coordenada, el análisis de zona y la comparación DEBEN ofrecer una acción «Borrar» que restablezca el panel a su estado vacío y elimine del mapa los marcadores, círculos, entidades y resaltados propios del análisis, conservando las capas temáticas activas.
+- **FR-049**: La consulta puntual DEBE limitarse a una cobertura seleccionada por disponibilidad: dominios tectónicos; en su ausencia, unidades geológicas; en ausencia de ambos, el borde local del basemap de Colombia. Fuera de esa cobertura DEBE responder `insideCoverage=false` sin calcular entidades cercanas. Esta restricción NO DEBE recortar el análisis ni la comparación por radio.
 
 ### Key Entities *(include if feature involves data)*
 

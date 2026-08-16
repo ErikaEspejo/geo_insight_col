@@ -48,6 +48,20 @@ class GeometryTest {
     }
 
     @Test
+    void polygonClosesOpenExteriorAndHoleRings() {
+        Polygon polygon = GeometryFactory.polygon(
+                ring(c(-2, -2), c(2, -2), c(2, 2), c(-2, 2)),
+                List.of(ring(c(-1, -1), c(1, -1), c(1, 1), c(-1, 1))));
+
+        assertThat(polygon.exteriorRing()).hasSize(5);
+        assertThat(polygon.exteriorRing().getFirst()).isEqualTo(polygon.exteriorRing().getLast());
+        assertThat(polygon.holes().getFirst()).hasSize(5);
+        assertThat(polygon.holes().getFirst().getFirst()).isEqualTo(polygon.holes().getFirst().getLast());
+        assertThat(polygon.contains(c(0, 0))).isFalse();
+        assertThat(polygon.distanceMeters(c(-3, 0))).isBetween(110_900.0, 111_500.0);
+    }
+
+    @Test
     void multiPolygonContainsAnyPart() {
         Geometry multi = GeometryFactory.multiPolygon(List.of(
                 square(c(-3, -3), c(-2, -2)),

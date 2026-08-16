@@ -96,6 +96,7 @@ Contexto geocientífico de una coordenada (FR-009).
 ```json
 {
   "coordinate": { "lon": -74.07, "lat": 4.71 },
+  "insideCoverage": true,
   "geologicalUnits": [ { "id": "...", "name": "SimboloUC", "attributes": {...} } ],
   "tectonicDomains": [ { ... } ],
   "nearestFault":   { "entity": {...}, "distanceMeters": 1234.5 } | null,
@@ -103,7 +104,10 @@ Contexto geocientífico de una coordenada (FR-009).
   "nearestVolcano": { "entity": {...}, "distanceMeters": 54321.0 } | null
 }
 ```
-`null` = ausencia explícita por dominio (FR-014). `400` coordenada inválida.
+`null` = ausencia explícita por dominio (FR-014). Fuera de cobertura se responde
+`200` con `insideCoverage=false`, ambas listas vacías y los tres vecinos en
+`null`. La cobertura se selecciona por disponibilidad: dominios tectónicos,
+luego unidades geológicas y finalmente el basemap. `400` coordenada inválida.
 
 ### `POST /api/zones/analyze`
 Indicadores descriptivos de una zona (FR-010).
@@ -137,15 +141,16 @@ Comparación de dos zonas (FR-011).
 
 ```json
 {
-  "zoneA": { "lon": -74.07, "lat": 4.71, "radiusMeters": 10000 },
-  "zoneB": { "lon": -75.0, "lat": 5.0, "radiusMeters": 10000 }
+  "zoneA": { "lon": -74.07, "lat": 4.71 },
+  "zoneB": { "lon": -75.0, "lat": 5.0 },
+  "radiusMeters": 10000
 }
 ```
+- `radiusMeters` es único y se aplica por igual a las dos zonas; no se aceptan radios independientes.
 - `200` → `{ "zoneA": {indicators}, "zoneB": {indicators} }`, mismo esquema en ambas (SC-004).
-  Cada lado conserva los indicadores de zona e incluye además el contexto ya
-  definido para su punto central: `centerGeologicalUnits`,
-  `centerTectonicDomains`, `nearestFault`, `nearestMassMovement` y
-  `nearestVolcano`. Cada desglose incluye `dataAvailable` para distinguir un
+  Cada lado conserva los indicadores de zona e incluye `nearestFault`,
+  `nearestMassMovement` y `nearestVolcano`, seleccionados únicamente entre las
+  entidades incluidas por el radio. Cada desglose incluye `dataAvailable` para distinguir un
   conteo cero de un dataset no disponible (FR-014, FR-020). Las distancias son
   descriptivas y no expresan riesgo, amenaza ni seguridad (FR-012).
 

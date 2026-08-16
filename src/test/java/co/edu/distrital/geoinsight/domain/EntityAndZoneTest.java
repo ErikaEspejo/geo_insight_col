@@ -35,6 +35,14 @@ class EntityAndZoneTest {
     }
 
     @Test
+    void zoneRejectsNonFiniteRadius() {
+        Coordinate center = new Coordinate(-74.0, 4.7);
+        assertThatThrownBy(() -> new Zone(center, Double.NaN)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new Zone(center, Double.POSITIVE_INFINITY)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new Zone(center, Double.NEGATIVE_INFINITY)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     void zoneContainsCoordinateWithinRadius() {
         Zone zone = new Zone(new Coordinate(-74.0, 4.7), 112_000);
         assertThat(zone.containsCoordinate(new Coordinate(-74.0, 5.7))).isTrue();

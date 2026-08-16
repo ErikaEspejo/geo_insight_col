@@ -4,6 +4,10 @@ import co.edu.distrital.geoinsight.domain.model.Zone;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.Comparator;
+import java.util.List;
+import co.edu.distrital.geoinsight.domain.geometry.Coordinate;
+import co.edu.distrital.geoinsight.domain.model.GeoscienceEntity;
 
 /**
  * US5 — Comparación descriptiva de dos zonas con los mismos criterios
@@ -13,12 +17,9 @@ import java.util.Objects;
 public class ZoneComparisonService {
 
     private final ZoneAnalysisService zoneAnalysisService;
-    private final CoordinateContextService coordinateContextService;
 
-    public ZoneComparisonService(ZoneAnalysisService zoneAnalysisService,
-                                 CoordinateContextService coordinateContextService) {
+    public ZoneComparisonService(ZoneAnalysisService zoneAnalysisService) {
         this.zoneAnalysisService = zoneAnalysisService;
-        this.coordinateContextService = coordinateContextService;
     }
 
     public ZoneComparisonResult compare(Zone zoneA, Zone zoneB) {
@@ -28,8 +29,19 @@ public class ZoneComparisonService {
     }
 
     private ComparedZone compareZone(Zone zone) {
+        ZoneAnalysisResult analysis = zoneAnalysisService.analyze(zone);
         return new ComparedZone(
-                zoneAnalysisService.analyze(zone),
-                coordinateContextService.context(zone.center()));
+                analysis,
+                nearest(analysis.faults().entities(), zone.center()),
+                nearest(analysis.massMovements().entities(), zone.center()),
+                nearest(analysis.volcanoes().entities(), zone.center()));
+    }
+
+    private NearestEntity nearest(List<GeoscienceEntity> entities, Coordinate center) {
+        return entities.stream()
+                .map(entity -> new NearestEntity(entity, entity.geometry().distanceMeters(center)))
+                .min(Comparator.comparingDouble(NearestEntity::distanceMeters)
+                        .thenComparing(nearest -> nearest.entity().id()))
+                .orElse(null);
     }
 }

@@ -10,7 +10,7 @@ Fase 0 del workflow `/speckit.plan`. Consolidación de decisiones verificadas; n
 
 **Decision**: Los cinco datasets se obtienen de las APIs REST oficiales del SGC (ArcGIS Feature Server) con paginación (`resultOffset`/`resultRecordCount`) y `outSR=4326` (lon/lat). Un script PowerShell (`scripts/download-datasets.ps1`) ya lo implementa y fue verificado end-to-end; el backend reutiliza la misma lógica en `infrastructure/download/SgcDatasetDownloader` para la auto-descarga al arrancar.
 
-**Rationale**: `returnCountOnly` confirmó los conteos exactos (61/4866/7461/3/6826), lo que permite verificar integridad al descargar y al arrancar. `maxRecordCount` es 1000 para `MAPAGEOLOGIA` y 2000 para el resto, por eso es obligatoria la paginación.
+**Rationale**: `returnCountOnly` confirmó los conteos exactos (61/4866/7461/3/6826), que se usan para verificar la integridad de cada descarga inicial. En arranques posteriores se reutiliza el archivo local si puede cargarse y contiene entidades, sin volver a comparar el conteo oficial. `maxRecordCount` es 1000 para `MAPAGEOLOGIA` y 2000 para el resto, por eso es obligatoria la paginación.
 
 **Alternatives considered**:
 - Descarga manual única por el usuario: descartada (decisión del usuario: auto-descarga al iniciar).
@@ -120,11 +120,12 @@ Tipos confirmados en los datos locales:
 **Decision** (reglas explícitas y comprobables, trazables a la spec):
 - **Distancia**: haversine entre puntos; distancia punto-a-segmento para fallas; la distancia reportada es la mínima entre la coordenada consultada y la geometría (soporta multiparte).
 - **Contención** (unidades y dominios tectónicos): ray casting punto-en-polígono; multiparte evalúa cada parte.
-- **Empates de proximidad** (edge case): se desempata por orden de inserción estable (id numérico menor primero); nunca se invente un empate arbitrario no determinista.
-- **Coordenada fuera de cobertura**: respuesta explícita "sin resultado" por dominio (FR-014), nunca inventar datos.
+- **Empates de proximidad** (edge case): se desempata por el identificador completo en orden lexicográfico ascendente, regla uniforme para IDs SGC y GEOINSIGHT.
+- **Cobertura de consulta puntual**: se usa una cascada por disponibilidad. Primero dominios tectónicos; si ese dataset no está disponible, unidades geológicas; si ambos están ausentes, el borde local del basemap de Colombia. No se avanza en la cascada porque el punto no esté contenido.
+- **Coordenada fuera de cobertura**: respuesta `insideCoverage=false`, contenedores vacíos y vecinos `null`; el análisis y la comparación continúan usando exclusivamente la intersección con sus radios y no aplican este recorte.
 - **Zona**: radio en metros; movimiento/volcán dentro si distancia centro-punto ≤ radio; falla presente si distancia centro-línea ≤ radio; unidad/dominio presente si el polígono contiene el centro o intersecta la circunferencia de la zona.
 - **Comparación**: mismo conjunto de indicadores en ambas zonas, solo diferencias descriptivas (FR-011, SC-004).
-- **Comparación enriquecida**: cada lado compone el análisis del radio con el contexto puntual ya especificado. El vecino más cercano puede estar fuera del radio y se rotula separadamente de “dentro de la zona”.
+- **Comparación**: cada lado reutiliza el análisis del radio. Los vecinos más cercanos se eligen únicamente entre las entidades ya incluidas dentro o intersectadas por ese radio; no se agrega contexto puntual central.
 - **Estados**: `count: 0` significa dataset disponible sin coincidencias; `dataAvailable: false` significa dataset ausente/no cargado; atributo vacío y error conservan mensajes distintos.
 - **Sin riesgo/amenaza** (FR-012, SC-005): los indicadores son conteos, distribuciones, nombres y distancias; sin adjetivos de peligrosidad.
 
@@ -132,7 +133,7 @@ Tipos confirmados en los datos locales:
 
 - Las capas temáticas inician desactivadas. Cada toggle invalida solicitudes pendientes para impedir que una respuesta tardía reactive una capa apagada.
 - El control de capas flota en la esquina inferior derecha del mapa, sobre la barra de coordenadas, y combina el símbolo cartográfico convencional de tres capas apiladas (SVG) con la etiqueta «Capas». El desplegable abre hacia arriba, conserva tooltip, etiqueta accesible, foco visible y estado expandido, y se cierra con clic fuera o Escape.
-- La herramienta lateral «Explorar mapa» se eliminó: la lista de capas vive únicamente en el control flotante. El panel contextual inicia colapsado y sin módulo activo; el zoom nativo de Leaflet permanece sin superposición con el control de capas.
+- La herramienta lateral «Explorar mapa» se eliminó: la lista de capas vive únicamente en el control flotante. El panel contextual inicia colapsado con «Buscar y filtrar» como módulo predeterminado, evitando un panel vacío al expandir; el zoom nativo de Leaflet permanece sin superposición con el control de capas.
 - Los puntos densos (6826 movimientos) se renderizan en canvas con hit-testing propio; líneas y polígonos permanecen en Leaflet GeoJSON.
 - La consulta por coordenada responde a clics únicamente cuando su módulo está activo. Zona A, Zona B y análisis de zona usan un selector explícito de un solo clic.
 - Los campos de coordenadas permanecen vacíos y muestran el formato esperado mediante placeholders; el selector del mapa reemplaza esos valores cuando se activa explícitamente.

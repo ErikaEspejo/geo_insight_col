@@ -82,11 +82,11 @@ Resuelve todos los puntos del Technical Context y las semánticas geoespaciales 
 - Geometría OOP (`Geometry` abstracta; `Point`, `LineString`, `Polygon`, `MultiPoint`, `MultiLineString`, `MultiPolygon`), con comportamiento:
   - `distanceTo(Coordinate)` (mínima distancia punto-geometría, haversine + punto-segmento).
   - `contains(Coordinate)` (punto-en-polígono por ray casting; multiparte evalúa cada parte).
-  - `bounds()` (bbox) para acelerar búsquedas.
+  - `bounds()` (bbox) como información geométrica; los análisis actuales usan recorridos lineales porque el volumen medido cumple SC-002/SC-003 sin un filtro espacial adicional.
 - `Domain` (enum): `MOVIMIENTO_EN_MASA`, `FALLA_GEOLOGICA`, `UNIDAD_GEOLOGICA`, `DOMINIO_TECTONICO`, `VOLCAN`.
 - `Origin` (enum): `SGC`, `GEOINSIGHT`.
 - `GeoscienceEntity`: id, `Domain`, `Origin`, `Geometry`, atributos `Map<String,Object>`. Invariante: origen y dominio inmutables.
-- `Zone` (record): `Coordinate centro` + `double radioMetros` (validado > 0).
+- `Zone` (record): `Coordinate centro` + `double radioMetros` (finito, validado > 0 y sin máximo).
 - `UserAccount` / `Role` (enum `USER`, `ADMIN`): cuenta con usuario, hash BCrypt, rol.
 - `GeometryFactory`: construcción de geometrías desde coordenadas (evita estados inválidos).
 
@@ -94,15 +94,15 @@ Resuelve todos los puntos del Technical Context y las semánticas geoespaciales 
 
 - `auth/AuthenticationService`: login (verificación BCrypt), logout, registro (rol siempre USER, rechazo de usuario duplicado), consulta de sesión actual. Protege el invariant "cuentas registradas nunca son admin".
 - `exploration/LayerExplorationService`: listado de dominios + metadatos de capa (atributos filtrables y sus dominios de valores derivados), entidades por dominio con filtro, detalle de entidad por id.
-- `analysis/CoordinateContextService`: por dominio, para una coordenada: unidades que la contienen, dominios tectónicos que la contienen, falla más cercana con distancia, movimiento más cercano con distancia, volcán más cercano con distancia. Ausencia explícita por dominio.
+- `analysis/CoordinateContextService`: determina cobertura por disponibilidad (dominios tectónicos, unidades geológicas, basemap) y, dentro de ella, obtiene contenedores y vecinos más cercanos con desempate lexicográfico. Fuera de cobertura devuelve ausencia explícita.
 - `analysis/ZoneAnalysisService`: para una zona (centro+radio): conteos y distribuciones de movimientos dentro del radio, fallas cuya distancia al centro ≤ radio, unidades y dominios tectónicos que intersectan la zona, volcanes dentro del radio. Sin frases de riesgo.
-- `analysis/ZoneComparisonService`: compone `ZoneAnalysisService` y `CoordinateContextService` para cada lado; expone zona, disponibilidad, contexto central y vecinos sin crear reglas espaciales nuevas.
+- `analysis/ZoneComparisonService`: reutiliza `ZoneAnalysisService` para cada lado y selecciona vecinos únicamente entre las entidades incluidas por cada radio.
 - `admin/GeoEntityManagementService`: crear/editar/eliminar entidades GEOINSIGHT con lista blanca, obligatoriedad y tipos derivados de los datasets, geometría por dominio y protección de entidades SGC.
-- `bootstrap/DatasetBootstrapService`: verifica presencia/integridad (conteo) de los 5 datasets; si falta, invoca el descargador; si falla la descarga, arranca con indicador de datos ausentes (FR-020).
+- `bootstrap/DatasetBootstrapService`: verifica que los 5 datasets locales existan y puedan cargarse; si falta alguno, invoca el descargador; si falla la descarga, arranca con indicador de datos ausentes (FR-020). El conteo oficial se valida al descargar, no se vuelve a consultar ni comparar en cada arranque.
 
 ### Infraestructura (`infrastructure/`)
 
-- `persistence/GeoJsonDatasetRepository`: lee y parsea los 5 GeoJSON (Jackson) y los expone como `List<GeoscienceEntity>` por dominio; mantiene contadores esperados.
+- `persistence/GeoJsonDatasetRepository`: lee y parsea los 5 GeoJSON (Jackson), los expone como `List<GeoscienceEntity>` por dominio e indica archivos ausentes, ilegibles o sin entidades.
 - `persistence/JsonGeoEntityRepository`: CRUD de entidades GEOINSIGHT sobre `data/geoentities.json`.
 - `persistence/JsonUserAccountRepository`: CRUD de cuentas sobre `data/users.json`; `AdminAccountSeeder` siembra el admin desde `config/admin-account.json` si no existe.
 - `download/SgcDatasetDownloader`: descarga vía `java.net.http.HttpClient` con paginación (resultOffset/resultRecordCount, outSR=4326), replicando la lógica verificada de `scripts/download-datasets.ps1`.
@@ -123,7 +123,7 @@ Resuelve todos los puntos del Technical Context y las semánticas geoespaciales 
 - `login.html`: identidad visual local, inicio de sesión y registro (rol usuario), sin SSO.
 - `index.html`: shell autenticado sin búsqueda global ni controles duplicados, navegación por módulos, mapa Leaflet, control flotante de capas, paneles de filtros/contexto/zona/comparación/ayuda con acciones «Borrar» propias de cada análisis y administración solo para ADMIN.
 - `js/map.js`: capas inicialmente inactivas; control flotante de capas en la esquina inferior derecha con icono convencional y selector desplegable; herramienta lateral “Explorar mapa” eliminada; panel contextual inicialmente colapsado; puntos densos en Canvas; protección contra respuestas asíncronas obsoletas; selección de entidades; vista previa de entidad al pasar el cursor (tooltip, incluidos los puntos en canvas); tabla de filtros con enfoque; selectores explícitos de coordenadas; centros/radios; dibujo administrativo Point/LineString/Polygon.
-- `js/compare.js`: tarjetas por dominio, contexto central, vecinos/distancias, estados explícitos, observaciones descriptivas cerradas y tabla resumen secundaria.
+- `js/compare.js`: tarjetas por dominio, vecinos/distancias limitados al radio, estados explícitos, observaciones descriptivas cerradas y tabla resumen secundaria.
 - `js/context.js`: consulta del contexto de una coordenada presentada en tres secciones (Resultado, Contexto geológico, Elementos cercanos) con tarjetas compactas, nombres descriptivos priorizados, distancias m/km con un decimal y estados de ausencia legibles; delega el dibujo del contexto en `GeoInsightMap.drawContext`.
 - `js/admin.js`: formulario dinámico desde metadata, coerción tipada, vocabularios categóricos, lista persistente “Mis entidades”, capa administrativa por color y modal propio de eliminación.
 - `js/auth.js`: login y registro local; no incluye SSO institucional.

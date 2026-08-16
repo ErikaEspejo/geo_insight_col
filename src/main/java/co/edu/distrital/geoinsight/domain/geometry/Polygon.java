@@ -16,8 +16,8 @@ public final class Polygon extends Geometry {
         if (exteriorRing == null || exteriorRing.size() < 3) {
             throw new IllegalArgumentException("Polygon requiere un anillo exterior con al menos 3 coordenadas");
         }
-        this.exteriorRing = List.copyOf(exteriorRing);
-        this.holes = holes == null ? List.of() : holes.stream().map(List::copyOf).toList();
+        this.exteriorRing = closeRing(exteriorRing);
+        this.holes = holes == null ? List.of() : holes.stream().map(Polygon::closeRing).toList();
     }
 
     public List<Coordinate> exteriorRing() {
@@ -70,5 +70,18 @@ public final class Polygon extends Geometry {
         rings.add(exteriorRing);
         rings.addAll(holes);
         return rings;
+    }
+
+    private static List<Coordinate> closeRing(List<Coordinate> ring) {
+        if (ring == null || ring.size() < 3) {
+            throw new IllegalArgumentException("Cada anillo de Polygon requiere al menos 3 coordenadas");
+        }
+        if (ring.getFirst().equals(ring.getLast())) {
+            return List.copyOf(ring);
+        }
+        List<Coordinate> closed = new ArrayList<>(ring.size() + 1);
+        closed.addAll(ring);
+        closed.add(ring.getFirst());
+        return List.copyOf(closed);
     }
 }

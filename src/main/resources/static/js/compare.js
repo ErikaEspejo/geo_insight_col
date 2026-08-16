@@ -16,8 +16,9 @@
     result.innerHTML = '<div class="skeleton">Calculando indicadores equivalentes…</div>';
     try {
       const data = await api.post('/api/zones/compare', {
-        zoneA: { lon: a.lon, lat: a.lat, radiusMeters: radius },
-        zoneB: { lon: b.lon, lat: b.lat, radiusMeters: radius }
+        zoneA: { lon: a.lon, lat: a.lat },
+        zoneB: { lon: b.lon, lat: b.lat },
+        radiusMeters: radius
       });
       GeoInsightMap.drawComparisonZones(data.zoneA.zone, data.zoneB.zone);
       renderCompare(data);
@@ -65,11 +66,11 @@
   function geologySection(a, b) {
     return section('Geología',
       side(domainCount(a.geologicalUnits, 'unidades intersectadas'), [
-        entityListMetric('Unidad(es) en el punto central', availableEntities(a.geologicalUnits, a.centerGeologicalUnits), geologicalLabel),
+        entityListMetric('Presentes en la zona', availableEntities(a.geologicalUnits, a.geologicalUnits.entities), geologicalLabel),
         entityListMetric('Edades disponibles', availableEntities(a.geologicalUnits, uniqueAttributes(a.geologicalUnits.entities, 'Edad')))
       ]),
       side(domainCount(b.geologicalUnits, 'unidades intersectadas'), [
-        entityListMetric('Unidad(es) en el punto central', availableEntities(b.geologicalUnits, b.centerGeologicalUnits), geologicalLabel),
+        entityListMetric('Presentes en la zona', availableEntities(b.geologicalUnits, b.geologicalUnits.entities), geologicalLabel),
         entityListMetric('Edades disponibles', availableEntities(b.geologicalUnits, uniqueAttributes(b.geologicalUnits.entities, 'Edad')))
       ]));
   }
@@ -77,11 +78,9 @@
   function tectonicSection(a, b) {
     return section('Tectónica',
       side(domainCount(a.tectonicDomains, 'dominios intersectados'), [
-        entityListMetric('Dominio(s) en el punto central', availableEntities(a.tectonicDomains, a.centerTectonicDomains), tectonicLabel),
         entityListMetric('Presentes en la zona', availableEntities(a.tectonicDomains, a.tectonicDomains.entities), tectonicLabel)
       ]),
       side(domainCount(b.tectonicDomains, 'dominios intersectados'), [
-        entityListMetric('Dominio(s) en el punto central', availableEntities(b.tectonicDomains, b.centerTectonicDomains), tectonicLabel),
         entityListMetric('Presentes en la zona', availableEntities(b.tectonicDomains, b.tectonicDomains.entities), tectonicLabel)
       ]));
   }
@@ -112,7 +111,7 @@
 
   function nearestMetric(label, nearest) {
     if (nearest === undefined) return metric(label, 'Información no disponible');
-    if (nearest === null) return metric(label, 'No hay entidades disponibles');
+    if (nearest === null) return metric(label, 'Sin registros dentro del radio');
     return `<div class="compare-metric"><span>${ui.escapeHtml(label)}</span><strong>${ui.escapeHtml(ui.entityName(nearest.entity))}</strong><small>Distancia desde el centro: ${ui.escapeHtml(ui.formatMeters(nearest.distanceMeters))}</small></div>`;
   }
 

@@ -122,7 +122,7 @@ scripts/download-datasets.ps1         # descarga manual (base del bootstrap)
 
 ### Tests for User Story 3
 
-- [x] T030 [P] [US3] Tests de aplicación (TDD, fallan antes): contención, distancia más cercana correcta, regla de empate (id menor primero), fuera de cobertura → null, coordenada inválida en `src/test/java/co/edu/distrital/geoinsight/application/analysis/`
+- [x] T030 [P] [US3] Tests de aplicación: cascada de cobertura, fuera de cobertura → null y desempate por identificador completo en `src/test/java/co/edu/distrital/geoinsight/application/analysis/`
 
 ### Implementation for User Story 3
 
@@ -170,7 +170,7 @@ scripts/download-datasets.ps1         # descarga manual (base del bootstrap)
 
 ### Implementation for User Story 5
 
-- [x] T039 [US5] `ZoneComparisonService` en `src/main/java/co/edu/distrital/geoinsight/application/analysis/` (reutiliza `ZoneAnalysisService`; extendido en T055 con `CoordinateContextService` para contexto central y vecinos cercanos)
+- [x] T039 [US5] `ZoneComparisonService` en `src/main/java/co/edu/distrital/geoinsight/application/analysis/` (reutiliza `ZoneAnalysisService` y limita los vecinos cercanos a las entidades del radio)
 - [x] T040 [US5] Extender `AnalysisController`: POST `/api/zones/compare` en `src/main/java/co/edu/distrital/geoinsight/web/controller/AnalysisController.java`
 - [x] T041 [US5] Frontend: UI de comparación (dos zonas, dos círculos, columnas lado a lado) en `src/main/resources/static/js/compare.js` + `index.html`
 
@@ -216,17 +216,19 @@ scripts/download-datasets.ps1         # descarga manual (base del bootstrap)
 - [x] T052 [US2] Filtros OR por valores del mismo atributo y AND entre atributos; limpieza al cambiar capa; tabla de resultados con zoom en `LayerExplorationService`, `LayerController` y `static/js/map.js`.
 - [x] T053 [US3/US4/US5] Selector de coordenada explícito por formulario y consulta puntual limitada a su módulo.
 - [x] T054 [US4/US5] Centros, radios diferenciados y ajuste de viewport para análisis y comparación.
-- [x] T055 [US5] Comparación enriquecida mediante composición de `ZoneAnalysisService` y `CoordinateContextService`; disponibilidad explícita, tarjetas por dominio y observaciones solo descriptivas.
+- [x] T055 [US5] Comparación radial mediante reutilización de `ZoneAnalysisService`; vecinos limitados a las entidades incluidas por el radio, disponibilidad explícita, tarjetas por dominio y observaciones solo descriptivas.
 - [x] T056 [US6] Lista blanca de atributos descriptivos, `AttributeValueType` derivado y validación de claves/tipos en backend; metadata administrativa en `GET /api/layers`.
 - [x] T057 [US6] Formulario administrativo dinámico con valores categóricos reales y controles tipados; eliminación de captura JSON libre.
 - [x] T058 [US6] Dibujo Point/LineString/Polygon sin dependencia externa; lista/capa “Mis entidades”, colores por dominio y modal propio de eliminación.
 - [x] T059 [US1..US6] Rediseño responsive de login con recursos públicos y sin SSO, shell sin controles redundantes, placeholders de coordenadas, detalle legible y ayuda contextual por rol.
-- [x] T060 Pruebas de regresión y contrato actualizadas; suite completa verificada con 77 tests en verde.
+- [x] T060 Pruebas de regresión y contrato actualizadas; suite completa verificada con 88 tests en verde.
 - [x] T061 [US2] Mover el selector de capas a un control flotante en la esquina inferior derecha del mapa, con icono convencional de capas apiladas, etiqueta «Capas», desplegable que abre hacia arriba y cierre por clic fuera o Escape, conservando tooltip, etiqueta accesible, foco visible y estado activo.
 - [x] T062 [US2] Eliminar la herramienta lateral «Explorar mapa» y su panel; la lista de capas queda únicamente en el control flotante y la ayuda se actualiza a «Capas del mapa».
-- [x] T063 [US2] Inicializar el panel contextual colapsado y sin módulo activo, sincronizando chevrón y etiqueta del botón de colapso con el estado cerrado.
+- [x] T063 [US2] Inicializar el panel contextual colapsado con «Buscar y filtrar» como módulo predeterminado, sincronizando chevrón y etiqueta del botón de colapso con el estado cerrado.
 - [x] T064 [US2/US4/US5] Vista previa de entidad al pasar el cursor: tooltip de Leaflet en líneas/polígonos y hit-testing en puntos canvas (mismo tooltip que el clic) en `static/js/map.js` + `css/styles.css`.
 - [x] T065 [US3/US4/US5] Acción «Borrar» en consulta por coordenada, análisis de zona y comparación: restablece el panel a su estado vacío y limpia los overlays propios del análisis en `index.html`, `context.js`, `zone.js`, `compare.js`.
+- [x] T066 [US5] Unificar el contrato de comparación con un único `radiusMeters` común para ambas coordenadas en `CompareRequest`, `AnalysisController`, `contracts/api.md`, `compare.js` y pruebas web.
+- [x] T067 Sincronizar constitución 1.0.1, plan, research, modelo de datos, checklist y README con las decisiones implementadas y la ubicación oficial de artefactos Spec Kit.
 
 ---
 

@@ -62,7 +62,9 @@ public class AnalysisController {
 
     @PostMapping("/zones/compare")
     public ObjectNode compare(@Valid @RequestBody CompareRequest request) {
-        ZoneComparisonResult result = zoneComparisonService.compare(toZone(request.zoneA()), toZone(request.zoneB()));
+        ZoneComparisonResult result = zoneComparisonService.compare(
+                toZone(request.zoneA(), request.radiusMeters()),
+                toZone(request.zoneB(), request.radiusMeters()));
         ObjectNode node = objectMapper.createObjectNode();
         node.set("zoneA", comparedZoneToJson(result.zoneA()));
         node.set("zoneB", comparedZoneToJson(result.zoneB()));
@@ -71,12 +73,9 @@ public class AnalysisController {
 
     private ObjectNode comparedZoneToJson(ComparedZone compared) {
         ObjectNode node = zoneToJson(compared.analysis());
-        CoordinateContext context = compared.centerContext();
-        node.set("centerGeologicalUnits", entitiesToJson(context.geologicalUnits()));
-        node.set("centerTectonicDomains", entitiesToJson(context.tectonicDomains()));
-        node.set("nearestFault", nearestToJson(context.nearestFault()));
-        node.set("nearestMassMovement", nearestToJson(context.nearestMassMovement()));
-        node.set("nearestVolcano", nearestToJson(context.nearestVolcano()));
+        node.set("nearestFault", nearestToJson(compared.nearestFault()));
+        node.set("nearestMassMovement", nearestToJson(compared.nearestMassMovement()));
+        node.set("nearestVolcano", nearestToJson(compared.nearestVolcano()));
         return node;
     }
 
@@ -88,9 +87,14 @@ public class AnalysisController {
         return new Zone(new Coordinate(request.lon(), request.lat()), request.radiusMeters());
     }
 
+    private Zone toZone(CoordinateRequest request, double radiusMeters) {
+        return new Zone(toCoordinate(request), radiusMeters);
+    }
+
     private ObjectNode contextToJson(CoordinateContext context) {
         ObjectNode node = objectMapper.createObjectNode();
         node.set("coordinate", coordinateToJson(context.coordinate()));
+        node.put("insideCoverage", context.insideCoverage());
         node.set("geologicalUnits", entitiesToJson(context.geologicalUnits()));
         node.set("tectonicDomains", entitiesToJson(context.tectonicDomains()));
         node.set("nearestFault", nearestToJson(context.nearestFault()));

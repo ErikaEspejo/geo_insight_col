@@ -102,6 +102,12 @@
   }
 
   function renderContext(data) {
+    if (data.insideCoverage === false) {
+      result.innerHTML = `<div class="context-result-body">${sectionTitle('Resultado')}
+        ${coordinateCard(data.coordinate.lon, data.coordinate.lat)}
+        ${card(ICONS.domain, 'Cobertura', emptyBody('La coordenada está fuera de la cobertura disponible'))}</div>`;
+      return;
+    }
     const units = data.geologicalUnits || [];
     const domains = data.tectonicDomains || [];
     let html = '<div class="context-result-body">';

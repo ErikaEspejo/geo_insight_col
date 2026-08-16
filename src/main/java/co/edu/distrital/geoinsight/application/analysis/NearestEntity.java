@@ -6,7 +6,7 @@ import java.util.Objects;
 
 /**
  * Entidad más cercana a una coordenada con su distancia en metros. La regla de
- * empate es el orden de inserción estable del dataset (research.md §5).
+ * los empates se resuelven por identificador completo ascendente (research.md §6).
  */
 public record NearestEntity(GeoscienceEntity entity, double distanceMeters) {
 

@@ -13,6 +13,7 @@ import java.util.Objects;
  */
 public record CoordinateContext(
         Coordinate coordinate,
+        boolean insideCoverage,
         List<GeoscienceEntity> geologicalUnits,
         List<GeoscienceEntity> tectonicDomains,
         NearestEntity nearestFault,

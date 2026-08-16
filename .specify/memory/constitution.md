@@ -1,11 +1,11 @@
 <!--
 Sync Impact Report
-- Version change: (none) 1.0.0 (initial ratification)
-- Modified principles: none (new document)
-- Added sections: Core Principles (8), Additional Constraints,
-  Development Workflow, Governance
+- Version change: 1.0.0 -> 1.0.1
+- Modified principles: I. Specification-Driven Development First (clarified the Spec Kit artifact location)
+- Added sections: none
 - Removed sections: none
 - Deferred TODOs: none
+- Migration impact: approved feature specifications remain in `specs/<feature>/`; no artifact copy or code migration is required
 -->
 
 # GeoInsight Colombia Constitution
@@ -18,7 +18,9 @@ Specifications are the source of truth for expected system behavior.
 No implementation MAY precede an approved specification. Ambiguous or
 missing business rules MUST be resolved in the specification, never
 invented in code. A specification is approved only when it has passed
-the Spec Kit workflow and is recorded in `.specify/memory`.
+the Spec Kit workflow and is recorded in `specs/<feature>/`. The
+`.specify/memory` directory is reserved for project-wide governance memory,
+including this constitution, and MUST NOT duplicate feature specifications.
 
 Rationale: This guarantees that code, plans, and tests describe the
 same agreed behavior, and that undefined business decisions surface as
@@ -160,4 +162,4 @@ MUST be checked against this constitution.
   over runtime development guidance and working files, which MUST NOT
   contradict it.
 
-**Version**: 1.0.0 | **Ratified**: 2026-08-15 | **Last Amended**: 2026-08-15
+**Version**: 1.0.1 | **Ratified**: 2026-08-15 | **Last Amended**: 2026-08-16

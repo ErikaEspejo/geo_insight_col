@@ -38,14 +38,14 @@ La metadata de cada dominio expone: nombre legible, geometría admitida (punto/l
 | `Geometry` (abstracta) | `distanceTo(Coordinate)`, `contains(Coordinate)`, `bounds()` |
 | `Point` | Un par lon/lat |
 | `LineString` | Secuencia de puntos |
-| `Polygon` | Anillo exterior (+ agujeros si presentes en dataset) |
+| `Polygon` | Anillo exterior (+ agujeros si presentes en dataset); cierra automáticamente anillos abiertos |
 | `MultiPoint` / `MultiLineString` / `MultiPolygon` | Variantes multiparte reales |
 
 `Coordinate` (record): `lon` en [-180,180], `lat` en [-90,90]; `distanceTo(Coordinate)` haversine en metros.
 `GeometryFactory`: construcción validada (deserializa desde el GeoJSON real).
 
 ### `Zone` (record)
-`Coordinate centro` + `double radioMetros` (validación FR-016: radio > 0, centro válido).
+`Coordinate centro` + `double radioMetros` (validación FR-016: radio finito > 0, sin máximo, centro válido).
 
 ### `UserAccount` y `Role`
 | Campo | Reglas |
@@ -56,12 +56,12 @@ La metadata de cada dominio expone: nombre legible, geometría admitida (punto/l
 
 ## Resultados de análisis (DTOs de dominio → web)
 
-- `CoordinateContextResult`: por dominio, resultado o ausencia explícita (FR-014):
+- `CoordinateContextResult`: incluye `insideCoverage`; por dominio, resultado o ausencia explícita (FR-014, FR-049):
   - Unidades contenientes (0..n), Dominios contenientes (0..n),
   - Falla más cercana + distancia (m), Movimiento más cercano + distancia (m), Volcán más cercano + distancia (m).
 - `ZoneBreakdown`: `dataAvailable`, conteo, distribución (`byTipo` por `TIPO` para movimientos — además de `bySubtipo`/`byClasMapa` — y por `Tipo` para fallas, `Edad` para unidades geológicas y `NombreDT` para dominios tectónicos), entidades intersectadas y `Sin clasificar` para registros sin el atributo. `dataAvailable=false` no equivale a conteo cero.
 - `ZoneIndicators`: cinco `ZoneBreakdown` y la zona consultada. Solo descriptivos (FR-012).
-- `ComparedZone`: composición de `ZoneIndicators` + `CoordinateContextResult` para el mismo centro; reutiliza reglas existentes, no duplica geometría.
+- `ComparedZone`: composición de `ZoneIndicators` y los vecinos más cercanos seleccionados únicamente entre las entidades incluidas por el radio; no incorpora contexto puntual central.
 - `ZoneComparison`: `ComparedZone` de A y B, mismo esquema lado a lado (SC-004).
 
 ## Reglas de negocio (trazables)

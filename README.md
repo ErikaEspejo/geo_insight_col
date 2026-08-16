@@ -98,6 +98,6 @@ polígonos se aplica únicamente al GeoJSON de visualización (SC-001).
 
 ## Validación
 
-La guía de escenarios de extremo a extremo (E1–E8) y los criterios de
+La guía de escenarios de extremo a extremo (E1–E9) y los criterios de
 aceptación están en `specs/001-geoinsight-core/quickstart.md`; el contrato REST
 en `specs/001-geoinsight-core/contracts/api.md`.
