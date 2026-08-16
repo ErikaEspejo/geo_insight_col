@@ -181,7 +181,7 @@ El administrador crea, edita y elimina entidades de origen GEOINSIGHT en cualqui
 - **FR-015**: La procedencia de cada entidad DEBE ser visible en las consultas.
 - **FR-016**: Las coordenadas y radios DEBEN validarse antes de procesarse.
 - **FR-017**: Las geometrías DEBEN tratarse respetando su tipo, CRS y orden de coordenadas.
-- **FR-018**: Los campos obligatorios y dominios de valores para crear entidades DEBEN derivarse de los datasets.
+- **FR-018**: Los campos obligatorios y dominios de valores para crear entidades DEBEN derivarse de atributos existentes en los datasets. Para las entidades nuevas GEOINSIGHT se exige un identificador descriptivo mínimo por dominio (`TIPO`, `NombreFalla`, `SimboloUC`, `NombreDT` o `NombreVolcan`, según corresponda), aunque el registro histórico SGC pueda contener valores nulos o vacíos; esta regla no normaliza ni reinterpreta los datos SGC.
 - **FR-019**: Una entidad GEOINSIGHT DEBE poder participar en consultas y análisis sin presentarse como SGC.
 - **FR-020**: El sistema DEBE indicar de forma inequívoca la ausencia de un dataset o de datos cargados.
 - **FR-021**: Todo acceso al sistema DEBE exigir autenticación previa.

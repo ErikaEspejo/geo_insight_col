@@ -25,7 +25,6 @@ import java.util.function.Function;
 @Service
 public class LayerExplorationService {
 
-    private static final int MAX_DISTINCT_VALUES = 200;
     private static final int HEAVY_POLYGON_LAYER_THRESHOLD = 1000;
 
     private final EntityCatalog catalog;
@@ -117,7 +116,6 @@ public class LayerExplorationService {
                 .map(String::valueOf)
                 .distinct()
                 .sorted()
-                .limit(MAX_DISTINCT_VALUES)
                 .toList();
     }
 

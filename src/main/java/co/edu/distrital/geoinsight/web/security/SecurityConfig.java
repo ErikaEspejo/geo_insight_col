@@ -73,7 +73,13 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login.html", "/css/**", "/js/**", "/lib/**", "/images/**", "/assets/**",
+                        .requestMatchers("/login.html",
+                                "/css/styles.css", "/css/login.css", "/css/login-reference.css",
+                                "/css/login-exact.css", "/css/login-assets.css",
+                                "/js/api.js", "/js/auth.js",
+                                "/images/geoinsight-logo.png", "/images/colombian-volcanic-landscape.png",
+                                "/assets/colombian-volcanic-landscape.png",
+                                "/assets/colombian-volcanic-landscape-v2.png",
                                 "/api/auth/register", "/api/auth/login", "/api/auth/logout").permitAll()
                         .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
                         .anyRequest().authenticated())

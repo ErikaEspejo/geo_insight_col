@@ -155,6 +155,13 @@ class LayerWebTest {
     }
 
     @Test
+    void missingEntityReturnsContractErrorBody() throws Exception {
+        mockMvc.perform(get("/api/entities/VOLCAN/SGC-inexistente").session(session))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Entidad no encontrada: SGC-inexistente"));
+    }
+
+    @Test
     void heavyPolygonLayerIsSimplifiedForVisualization() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/entities/UNIDAD_GEOLOGICA").session(session))
                 .andExpect(status().isOk())

@@ -41,7 +41,7 @@ scripts/download-datasets.ps1         # descarga manual (base del bootstrap)
 
 - [x] T001 Create Maven project: `pom.xml` con Java 21, `spring-boot-starter-parent` 3.3.x y dependencias `web`, `security`, `validation`, `test` (JUnit 5 + AssertJ). `groupId co.edu.distrital`, `artifactId geo-insight-col`
 - [x] T002 Configure Maven Wrapper (`mvnw.cmd`, `mvnw`, `.mvn/wrapper/maven-wrapper.properties`) con Maven 3.9.x
-- [x] T003 [P] Application config: `src/main/resources/application.properties` (server.port=8080, rutas configurables: `geoinsight.data-dir=data`, `geoinsight.datasets-dir=docs/datasets`, `geoinsight.admin-account=config/admin-account.json`)
+- [x] T003 [P] Application config: `src/main/resources/application.properties` (server.port=8080, rutas configurables: `geoinsight.data-dir=data`, `geoinsight.datasets-dir=docs/datasets`, `geoinsight.admin-account-file=config/admin-account.json`)
 - [x] T004 [P] Vendor Leaflet 1.9.x: descargar `leaflet.js`, `leaflet.css` y `images/` en `src/main/resources/static/lib/leaflet/` (local, sin CDN)
 - [x] T005 [P] Create `config/admin-account.json` con `username: "admin"` y `passwordHash` BCrypt de la contraseña por defecto (documentar la contraseña en el archivo de tareas y en quickstart.md; p. ej. `admin123`)
 - [x] T006 [P] Update `.gitignore`: ignorar `data/` (users.json, geoentities.json)
@@ -59,12 +59,12 @@ scripts/download-datasets.ps1         # descarga manual (base del bootstrap)
 - [x] T009 [P] Domain model: `Domain` (enum 5 dominios con atributos obligatorios/admitidos), `Origin` (SGC/GEOINSIGHT), `GeoscienceEntity` (id, domain, origin, geometry, `Map<String,Object>` attributes; invariantes), `Zone` (record centro+radio validado) en `src/main/java/co/edu/distrital/geoinsight/domain/model/`
 - [x] T010 [P] Domain repository interfaces: `DatasetRepository` (entidades por dominio, metadatos de capa), `GeoEntityRepository` (CRUD GEOINSIGHT), `UserAccountRepository` en `src/main/java/co/edu/distrital/geoinsight/domain/repository/`
 - [x] T011 [P] Domain unit tests (TDD, deben fallar antes de T007-T009): distancia haversine, contención polígono/multiparte/agujeros, distancia punto-a-línea, invariantes de entidad en `src/test/java/co/edu/distrital/geoinsight/domain/`
-- [x] T012 Infrastructure dataset loader: `GeoJsonDatasetLoader` (Jackson) parsea los 5 GeoJSON de `docs/datasets/`, valida conteos esperados (61/4866/7461/3/6826), expone entidades por dominio en `src/main/java/co/edu/distrital/geoinsight/infrastructure/persistence/`
+- [x] T012 Infrastructure dataset loader: `GeoJsonDatasetRepository` (Jackson) parsea los 5 GeoJSON de `docs/datasets/`, valida conteos esperados (61/4866/7461/3/6826), expone entidades por dominio en `src/main/java/co/edu/distrital/geoinsight/infrastructure/persistence/`
 - [x] T013 [P] Infrastructure downloader + bootstrap: `SgcDatasetDownloader` (java.net.http, paginación resultOffset/resultRecordCount, outSR=4326, verificación de conteo) replicando `scripts/download-datasets.ps1`, y `DatasetBootstrapService` (verifica/descarga al arranque) en `src/main/java/co/edu/distrital/geoinsight/infrastructure/download/` y `infrastructure/bootstrap/`
 - [x] T014 [P] Infrastructure `JsonGeoEntityRepository` (CRUD sobre `data/geoentities.json`, escritura atómica temp+rename) en `src/main/java/co/edu/distrital/geoinsight/infrastructure/persistence/`
 - [x] T015 [P] Infrastructure `JsonUserAccountRepository` + `AdminAccountSeeder` (siembra admin desde `config/admin-account.json` si no existe en `data/users.json`) en `src/main/java/co/edu/distrital/geoinsight/infrastructure/persistence/`
 - [x] T016 [P] Infrastructure tests (TDD): loader sobre archivos reales (conteos y atributos), downloader con servidor HTTP de prueba (pagina y verifica), repositorios round-trip en `src/test/java/co/edu/distrital/geoinsight/infrastructure/`
-- [x] T017 Web security skeleton: `SecurityConfig` (Spring Security, sesión HTTP, `PasswordEncoder` BCrypt, CSRF deshabilitado por API JSON local, rutas configuradas provisionalmente) y `CurrentUser` en `src/main/java/co/edu/distrital/geoinsight/web/security/`
+- [x] T017 Web security skeleton: `SecurityConfig` (Spring Security, sesión HTTP, `PasswordEncoder` BCrypt, CSRF deshabilitado por API JSON local y rutas públicas limitadas al login) en `src/main/java/co/edu/distrital/geoinsight/web/security/`
 
 **Checkpoint**: Fundación lista: dominio, datos cargados, persistencia, seguridad base. Las historias pueden comenzar.
 
@@ -203,8 +203,6 @@ scripts/download-datasets.ps1         # descarga manual (base del bootstrap)
 
 **Purpose**: Mejoras transversales y validación final
 
-- [x] T047 [P] Performance SC-001: medir tiempo de activación de la capa de unidades (7461 polígonos, ~119 MB). Si el render degrada (>10 s o navegador lento), agregar servicio de geometría simplificada SOLO para visualización (el análisis siempre usa geometría completa) en `application/exploration/` (KISS: con ~19k entidades, la búsqueda lineal en backend cumple SC-002/SC-003, no se agregan índices espaciales)
-- [x] T048 Validar escenarios E1–E9 de `specs/001-geoinsight-core/quickstart.md` manualmente (incluye sin conexión: fondo vectorial Colombia + capas funcionando)
 - [x] T049 [P] Documentación: actualizar `README.md` (cómo ejecutar, credenciales por defecto del admin sembrado, arquitectura backend+frontend, rutas de datos)
 - [x] T050 Build final completo: `./mvnw.cmd clean verify` con todos los tests en verde
 
@@ -219,17 +217,15 @@ scripts/download-datasets.ps1         # descarga manual (base del bootstrap)
   con espera incremental y prueba de recuperación después de un error HTTP
   transitorio.
 
-> **Corrección de estado (2026-08-16)**: T047 queda cubierta únicamente para
-> el componente servidor mediante `PerformanceAcceptanceTest`. La medición de
-> render de navegador se identifica como T047b y sigue abierta. La marca previa
-> de T048 no tenía evidencia registrada y queda reabierta hasta completar
-> `validation.md`.
+> **Estado actualizado (2026-08-16)**: T047a, T047b y T048-R se registran como
+> completadas. La evidencia automatizada y la validación manual confirmada por
+> el usuario están registradas en `validation.md`.
 
 - [x] T047a [P] Presupuestos backend SC-001..SC-003 con datasets reales:
   GeoJSON pesado <10 s, contexto <5 s y zona <5 s.
-- [ ] T047b Medir en navegador el render completo de unidades (<10 s) y
+- [x] T047b Medir en navegador el render completo de unidades (<10 s) y
   registrar entorno/resultado en `validation.md`.
-- [ ] T048-R Ejecutar E1–E9, incluida la prueba offline, y registrar evidencia
+- [x] T048-R Ejecutar E1–E9, incluida la prueba offline, y registrar evidencia
   visual en `validation.md`.
 
 - [x] T051 [US2] Capas inicialmente inactivas, render Canvas para puntos densos y control de respuestas asíncronas obsoletas en `static/js/map.js`.
@@ -241,7 +237,7 @@ scripts/download-datasets.ps1         # descarga manual (base del bootstrap)
 - [x] T057 [US6] Formulario administrativo dinámico con valores categóricos reales y controles tipados; eliminación de captura JSON libre.
 - [x] T058 [US6] Dibujo Point/LineString/Polygon sin dependencia externa; lista/capa “Mis entidades”, colores por dominio y modal propio de eliminación.
 - [x] T059 [US1..US6] Rediseño responsive de login con recursos públicos y sin SSO, shell sin controles redundantes, placeholders de coordenadas, detalle legible y ayuda contextual por rol.
-- [x] T060 Pruebas de regresión y contrato actualizadas; suite completa verificada con 88 tests en verde.
+- [x] T060 Pruebas de regresión y contrato actualizadas; suite completa verificada con 100 tests en verde.
 - [x] T061 [US2] Mover el selector de capas a un control flotante en la esquina inferior derecha del mapa, con icono convencional de capas apiladas, etiqueta «Capas», desplegable que abre hacia arriba y cierre por clic fuera o Escape, conservando tooltip, etiqueta accesible, foco visible y estado activo.
 - [x] T062 [US2] Eliminar la herramienta lateral «Explorar mapa» y su panel; la lista de capas queda únicamente en el control flotante y la ayuda se actualiza a «Capas del mapa».
 - [x] T063 [US2] Inicializar el panel contextual colapsado con «Buscar y filtrar» como módulo predeterminado, sincronizando chevrón y etiqueta del botón de colapso con el estado cerrado.

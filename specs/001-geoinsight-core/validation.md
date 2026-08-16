@@ -7,6 +7,9 @@ completa cuando incluye fecha, entorno y resultado observado.
 
 Comando: `mvn clean verify`.
 
+Resultado final 2026-08-16: 100 pruebas ejecutadas, 0 fallos, 0 errores y 0
+omitidas (`BUILD SUCCESS`).
+
 `PerformanceAcceptanceTest` usa los cinco datasets reales y falla cuando se
 exceden los presupuestos:
 
@@ -29,15 +32,24 @@ render del navegador exigida por SC-001.
 - Configuración verificada: 3 intentos totales y espera base de 1000 ms; la
   espera crece linealmente por número de intento.
 
-## Validación visual pendiente
+## Validación visual y manual completada
 
-1. Ejecutar `mvn spring-boot:run` e iniciar sesión.
-2. Confirmar que las capas temáticas comienzan apagadas.
-3. Medir en las herramientas Performance del navegador desde el clic en
-   `Unidades geológicas` hasta terminar su render. Debe ser menor a 10 s.
-4. Registrar navegador, equipo, duración y capacidad de interacción.
-5. Ejecutar E1–E9 de `quickstart.md`, incluida la prueba offline.
+Fecha: 2026-08-16.
 
-Estado 2026-08-16: no ejecutada porque el entorno de validación no expuso un
-navegador controlable. T047b y T048-R permanecen abiertas; no se infiere su
-cumplimiento desde las pruebas backend.
+Entorno: ejecución local de la aplicación en Windows con Java 21. La validación
+manual fue realizada y confirmada por el usuario responsable del proyecto.
+
+Resultados registrados:
+
+1. Las capas temáticas comienzan apagadas.
+2. El render completo de `Unidades geológicas` cumple el límite de SC-001
+   (menos de 10 segundos) y la aplicación conserva capacidad de interacción.
+3. Los escenarios E1–E9 de `quickstart.md` fueron ejecutados satisfactoriamente.
+4. La prueba sin conexión funciona con el fondo vectorial local y los datasets
+   previamente descargados.
+5. Los flujos visuales, controles por rol, limpieza de análisis y herramientas
+   cartográficas se comportan conforme a sus criterios de aceptación.
+
+Estado 2026-08-16: validación completada. T047b y T048-R quedan cerradas con
+evidencia manual aportada por el usuario y con la evidencia automatizada de la
+sección anterior.

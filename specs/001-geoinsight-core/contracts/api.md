@@ -27,7 +27,7 @@ Registra una cuenta de consulta. **Siempre** crea rol `USER` (FR-022).
 ```json
 { "username": "ana", "password": "secreta123" }
 ```
-- `201 Created` → `{ "username": "ana", "role": "USER" }`
+- `201 Created` → `{ "username": "ana", "role": "USER", "admin": false }`
 - `400` username/password inválidos (longitud mínima)
 - `409` username ya existe
 
@@ -60,15 +60,15 @@ Metadatos de los cinco dominios para construir el control de capas y filtros (FR
       "dataAvailable": true,
       "requiredAttributes": ["NombreVolcan"],
       "filterableAttributes": [
-        { "name": "NombreVolcan", "values": ["Nevado del Ruiz", "..."] },
-        { "name": "AlturaSobreNivelMar", "values": ["5300", "..."] }
+        { "name": "NombreVolcan", "values": ["Nevado del Ruiz", "..."] }
       ],
       "editableAttributes": ["NombreVolcan", "AlturaSobreNivelMar", "Comentarios", "URL"],
       "editableAttributeTypes": {"NombreVolcan":"TEXT", "AlturaSobreNivelMar":"INTEGER", "Comentarios":"TEXT", "URL":"TEXT"}
   }
 ]
 ```
-  `values` y `editableAttributes` derivan de los datasets reales; atributos
+  `values` contiene todos los valores distintos observados para cada atributo
+  filtrable y `editableAttributes` deriva de los datasets reales; atributos
   inexistentes no aparecen. Los campos técnicos del proveedor (identificadores
   internos y medidas de geometría) no se ofrecen para captura manual.
   `dataAvailable=false` indica inequívocamente dataset ausente o sin datos
@@ -110,8 +110,24 @@ Contexto geocientífico de una coordenada (FR-009).
 {
   "coordinate": { "lon": -74.07, "lat": 4.71 },
   "insideCoverage": true,
-  "geologicalUnits": [ { "id": "...", "name": "SimboloUC", "attributes": {...} } ],
-  "tectonicDomains": [ { ... } ],
+  "geologicalUnits": [
+    {
+      "id": "SGC-UNIDAD_GEOLOGICA-123",
+      "domain": "UNIDAD_GEOLOGICA",
+      "origin": "SGC",
+      "geometry": { "type": "Polygon", "coordinates": [...] },
+      "attributes": { "SimboloUC": "Q1", "Edad": "..." }
+    }
+  ],
+  "tectonicDomains": [
+    {
+      "id": "SGC-DOMINIO_TECTONICO-1",
+      "domain": "DOMINIO_TECTONICO",
+      "origin": "SGC",
+      "geometry": { "type": "Polygon", "coordinates": [...] },
+      "attributes": { "NombreDT": "..." }
+    }
+  ],
   "nearestFault":   { "entity": {...}, "distanceMeters": 1234.5 } | null,
   "nearestMassMovement": { "entity": {...}, "distanceMeters": 9876.5 } | null,
   "nearestVolcano": { "entity": {...}, "distanceMeters": 54321.0 } | null
@@ -185,6 +201,11 @@ Crea una entidad GEOINSIGHT (FR-004, FR-018).
 - `400` campos obligatorios faltantes, atributo fuera de la lista permitida,
   tipo escalar incompatible o geometría no admitida. Un campo `INTEGER` debe
   viajar como número JSON, no como cadena numérica.
+
+Los atributos obligatorios de las entidades nuevas GEOINSIGHT son `TIPO`,
+`NombreFalla`, `SimboloUC`, `NombreDT` y `NombreVolcan` para sus respectivos
+dominios. Esta regla garantiza identificación descriptiva mínima y no modifica
+los valores nulos o vacíos existentes en registros SGC.
 
 ### `GET /api/admin/entities`
 Lista únicamente entidades persistidas con origen `GEOINSIGHT`. La UI la usa

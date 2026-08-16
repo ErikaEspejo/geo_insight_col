@@ -1,5 +1,6 @@
 package co.edu.distrital.geoinsight.web.controller;
 
+import co.edu.distrital.geoinsight.application.common.EntityNotFoundException;
 import co.edu.distrital.geoinsight.application.exploration.LayerExplorationService;
 import co.edu.distrital.geoinsight.domain.model.Domain;
 import co.edu.distrital.geoinsight.domain.model.GeoscienceEntity;
@@ -7,7 +8,6 @@ import co.edu.distrital.geoinsight.infrastructure.persistence.DomainJsonCodec;
 import co.edu.distrital.geoinsight.web.dto.GeoJsonBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,11 +46,11 @@ public class EntityController {
     }
 
     @GetMapping("/{domain}/{id}")
-    public ResponseEntity<ObjectNode> entity(@PathVariable String domain, @PathVariable String id) {
+    public ObjectNode entity(@PathVariable String domain, @PathVariable String id) {
         Domain domainKey = domainFromKey(domain);
         return explorationService.entity(domainKey, id)
-                .map(entity -> ResponseEntity.ok(DomainJsonCodec.entityToJson(objectMapper, entity)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(entity -> DomainJsonCodec.entityToJson(objectMapper, entity))
+                .orElseThrow(() -> new EntityNotFoundException("Entidad no encontrada: " + id));
     }
 
     private Domain domainFromKey(String key) {

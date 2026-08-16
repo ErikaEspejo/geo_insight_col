@@ -22,6 +22,13 @@ Concepto común de los cinco dominios (spec, Key Entities).
 
 La metadata de cada dominio expone: nombre legible, geometría admitida (punto/línea/polígono), atributos obligatorios para creación (derivados de datasets), atributos filtrables con sus dominios de valores (derivados en arranque).
 
+Los atributos obligatorios de entidades nuevas GEOINSIGHT son `TIPO`,
+`NombreFalla`, `SimboloUC`, `NombreDT` y `NombreVolcan` para sus respectivos
+dominios. Son atributos reales elegidos como identificación descriptiva mínima;
+su obligatoriedad no se aplica retroactivamente a registros SGC nulos o vacíos.
+Los metadatos de filtro exponen todos los valores distintos observados, sin un
+recorte silencioso.
+
 ### Metadatos de atributos administrativos
 
 - `AttributeValueType`: enum `TEXT`, `INTEGER`, `DECIMAL`, `BOOLEAN`, derivado de valores escalares no nulos observados en cada GeoJSON.

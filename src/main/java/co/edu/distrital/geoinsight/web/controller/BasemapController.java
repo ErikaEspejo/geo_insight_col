@@ -2,6 +2,7 @@ package co.edu.distrital.geoinsight.web.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,13 +21,15 @@ import java.io.UncheckedIOException;
 @RequestMapping("/api/basemap")
 public class BasemapController {
 
-    private static final String COLOMBIA_GEOJSON = "basemap/colombia.geojson";
-
     private final ObjectMapper objectMapper;
+    private final String basemapFile;
     private volatile JsonNode cachedBasemap;
 
-    public BasemapController(ObjectMapper objectMapper) {
+    public BasemapController(
+            ObjectMapper objectMapper,
+            @Value("${geoinsight.basemap-file}") String basemapFile) {
         this.objectMapper = objectMapper;
+        this.basemapFile = basemapFile;
     }
 
     @GetMapping(value = "/colombia", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -38,7 +41,7 @@ public class BasemapController {
     }
 
     private JsonNode loadBasemap() {
-        try (InputStream input = new ClassPathResource(COLOMBIA_GEOJSON).getInputStream()) {
+        try (InputStream input = new ClassPathResource(basemapFile).getInputStream()) {
             return objectMapper.readTree(input);
         } catch (IOException e) {
             throw new UncheckedIOException("No se pudo cargar el fondo de Colombia", e);

@@ -44,7 +44,7 @@ operaciones de administración (`/api/admin/**`) exigen rol `ADMIN`.
 
 ## Datasets SGC
 
-Los datasets **no están versionados en git** (~134 MB; se obtienen de la fuente
+Los datasets **no están versionados en git** (~122 MB; se obtienen de la fuente
 oficial). Descarga manual opcional (el bootstrap también los descarga):
 
 ```powershell

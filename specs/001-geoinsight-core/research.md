@@ -10,16 +10,15 @@ Fase 0 del workflow `/speckit.plan`. Consolidación de decisiones verificadas; n
 
 **Decision**: Los cinco datasets se obtienen de las APIs REST oficiales del SGC (ArcGIS Feature Server) con paginación (`resultOffset`/`resultRecordCount`) y `outSR=4326` (lon/lat). Un script PowerShell (`scripts/download-datasets.ps1`) ya lo implementa y fue verificado end-to-end; el backend reutiliza la misma lógica en `infrastructure/download/SgcDatasetDownloader` para la auto-descarga al arrancar.
 
-**Rationale**: `returnCountOnly` confirmó los conteos exactos (61/4866/7461/3/6826), que se usan para verificar la integridad de cada descarga inicial. En arranques posteriores se reutiliza el archivo local si puede cargarse y contiene entidades, sin volver a comparar el conteo oficial. `maxRecordCount` es 1000 para `MAPAGEOLOGIA` y 2000 para el resto, por eso es obligatoria la paginación.
+**Rationale**: `returnCountOnly` confirmó los conteos exactos
+(61/4866/7461/3/6826), que quedaron versionados y se comparan localmente en
+cada arranque sin volver a consultar la API oficial. Un archivo ausente,
+corrupto, vacío o con un conteo distinto se vuelve a descargar.
+`maxRecordCount` es 1000 para `MAPAGEOLOGIA` y 2000 para el resto, por eso es
+obligatoria la paginación.
 
 **Alternatives considered**:
 
-> **Corrección de trazabilidad (2026-08-16)**: los conteos oficiales versionados
-> (61/4866/7461/3/6826) también se comparan localmente en cada arranque. Un
-> archivo ausente, corrupto, vacío o con un conteo distinto se considera no
-> disponible y se vuelve a descargar. Esta regla sustituye la frase anterior
-> que permitía reutilizar cualquier archivo no vacío y mantiene la validación
-> sin consultar nuevamente la API oficial.
 - Descarga manual única por el usuario: descartada (decisión del usuario: auto-descarga al iniciar).
 - Links de exportación `/export?f=geojson`: descartados por no paginar y devolver respuestas truncadas.
 - Bundling de los GeoJSON en el repo: descartado (gitignore + decisión de auto-descarga).
@@ -85,6 +84,14 @@ que un proveedor externo pueda bloquear indefinidamente el servidor local.
 
 **Decisión**: la captura GEOINSIGHT usa una lista blanca de campos descriptivos reales. Se excluyen metadatos del proveedor y medidas derivadas (`OBJECTID`, `FID`, `GlobalID`, `ESRI_OID`, `Shape__Area`, `Shape__Length`, `SHAPE_*`). Un campo completamente nulo tampoco se ofrece porque el dataset no aporta evidencia para inferir su tipo.
 
+**Decisión de obligatoriedad para nuevas entidades GEOINSIGHT**: cada dominio
+exige un atributo descriptivo mínimo tomado del esquema real: movimientos
+`TIPO`, fallas `NombreFalla`, unidades `SimboloUC`, dominios tectónicos
+`NombreDT` y volcanes `NombreVolcan`. Esta es una regla de calidad para altas y
+ediciones propias, no una inferencia de que el campo esté completo en el SGC.
+Los 2816 valores nulos observados en `NombreFalla` y los 14 valores vacíos de
+`NombreVolcan` se conservan intactos en los registros SGC.
+
 Tipos confirmados en los datos locales:
 
 | Dominio | Campos numéricos observados | Campos descriptivos editables |
@@ -103,7 +110,10 @@ Tipos confirmados en los datos locales:
 
 **Decision**: Carga total en memoria al arranque y búsquedas espaciales lineales por dominio; el backend sirve GeoJSON de visualización por dominio y el frontend combina Leaflet con Canvas para las capas puntuales densas.
 
-**Rationale**: Tamaños medidos — unidades 119.2 MB, fallas 8.1 MB, dominios 4.4 MB, movimientos 2.2 MB, volcanes <1 MB (~119 MB total). En una app local de un solo usuario es viable en memoria (SC-001..SC-003).
+**Rationale**: Tamaños medidos en los archivos locales actuales — unidades
+107.8 MB, fallas 7.4 MB, dominios 4.1 MB, movimientos 2.3 MB y volcanes <0.1 MB
+(121.7 MB decimales en total). En una app local de un solo usuario es viable en
+memoria (SC-001..SC-003).
 
 **Contingencia SC-001**: si la capa de unidades (7461 polígonos) degrada el render del navegador, se sirve geometría **simplificada solo para visualización** (Douglas-Peucker), mientras análisis y consultas usan siempre la geometría completa. Se decide en la tarea de frontend.
 

@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.nio.file.Files;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -62,10 +63,24 @@ class AuthWebTest {
 
     @Test
     void loginVisualAssetsArePublicWithoutSession() throws Exception {
+        mockMvc.perform(get("/css/login.css"))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/js/auth.js"))
+                .andExpect(status().isOk());
         mockMvc.perform(get("/images/geoinsight-logo.png"))
                 .andExpect(status().isOk());
         mockMvc.perform(get("/images/colombian-volcanic-landscape.png"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void applicationAssetsRequireSession() throws Exception {
+        mockMvc.perform(get("/js/admin.js"))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/css/layers.css"))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/lib/leaflet/leaflet.js"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -93,6 +108,25 @@ class AuthWebTest {
         mockMvc.perform(get("/api/auth/me").session((MockHttpSession) login.getRequest().getSession(false)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("ana"));
+    }
+
+    @Test
+    void loginRotatesAnExistingSessionIdentifier() throws Exception {
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"beatriz\",\"password\":\"clave123\"}"))
+                .andExpect(status().isCreated());
+        MockHttpSession existingSession = new MockHttpSession();
+        String previousId = existingSession.getId();
+
+        MvcResult login = mockMvc.perform(post("/api/auth/login")
+                        .session(existingSession)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"beatriz\",\"password\":\"clave123\"}"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(login.getRequest().getSession(false).getId()).isNotEqualTo(previousId);
     }
 
     @Test

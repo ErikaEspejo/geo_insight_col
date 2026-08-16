@@ -45,7 +45,7 @@ Se construye **GeoInsight Colombia** como una **aplicación web local** con back
 - Los diccionarios de datos (campos filtrables, obligatorios, dominios de valores) se derivan de los archivos reales.
 - Sin repositorios de datos adicionales (no DB/JPA/Spring Data).
 
-**Scale/Scope**: 5 dominios, ~19.000 entidades SGC (~119 MB en unidades, 8 MB fallas, 2 MB movimientos, 4 MB dominios, ~0 MB volcanes) + entidades GEOINSIGHT; 2 roles (usuario, administrador); un usuario activo.
+**Scale/Scope**: 5 dominios, ~19.000 entidades SGC (121.7 MB decimales en total: 107.8 MB unidades, 7.4 MB fallas, 2.3 MB movimientos, 4.1 MB dominios y <0.1 MB volcanes) + entidades GEOINSIGHT; 2 roles (usuario, administrador); un usuario activo.
 
 ## Constitution Check
 
@@ -97,11 +97,11 @@ Resuelve todos los puntos del Technical Context y las semánticas geoespaciales 
 - `analysis/CoordinateContextService`: determina cobertura por disponibilidad (dominios tectónicos, unidades geológicas, basemap) y, dentro de ella, obtiene contenedores y vecinos más cercanos con desempate lexicográfico. Fuera de cobertura devuelve ausencia explícita.
 - `analysis/ZoneAnalysisService`: para una zona (centro+radio): conteos y distribuciones de movimientos dentro del radio, fallas cuya distancia al centro ≤ radio, unidades y dominios tectónicos que intersectan la zona, volcanes dentro del radio. Sin frases de riesgo.
 - `analysis/ZoneComparisonService`: reutiliza `ZoneAnalysisService` para cada lado y selecciona vecinos únicamente entre las entidades incluidas por cada radio.
-- `admin/GeoEntityManagementService`: crear/editar/eliminar entidades GEOINSIGHT con lista blanca, obligatoriedad y tipos derivados de los datasets, geometría por dominio y protección de entidades SGC.
-- `bootstrap/DatasetBootstrapService`: verifica que los 5 datasets locales existan y puedan cargarse; si falta alguno, invoca el descargador; si falla la descarga, arranca con indicador de datos ausentes (FR-020). El conteo oficial se valida al descargar, no se vuelve a consultar ni comparar en cada arranque.
+- `admin/GeoEntityManagementService`: crear/editar/eliminar entidades GEOINSIGHT con lista blanca y tipos derivados de los datasets; exige un atributo descriptivo real mínimo por dominio como regla propia de nuevas entidades, sin alterar la nulabilidad histórica SGC; valida geometría por dominio y protege entidades SGC.
 
 ### Infraestructura (`infrastructure/`)
 
+- `bootstrap/DatasetBootstrapService`: verifica en cada arranque que los 5 datasets locales existan, puedan cargarse y coincidan con los conteos oficiales versionados; si alguno falla, invoca el descargador; si la descarga no se recupera, arranca con indicador de datos ausentes (FR-020). La validación local no vuelve a consultar la API oficial.
 - `persistence/GeoJsonDatasetRepository`: lee y parsea los 5 GeoJSON (Jackson), los expone como `List<GeoscienceEntity>` por dominio e indica archivos ausentes, ilegibles o sin entidades.
 - `persistence/JsonGeoEntityRepository`: CRUD de entidades GEOINSIGHT sobre `data/geoentities.json`.
 - `persistence/JsonUserAccountRepository`: CRUD de cuentas sobre `data/users.json`; `AdminAccountSeeder` siembra el admin desde `config/admin-account.json` si no existe.
@@ -133,7 +133,7 @@ Resuelve todos los puntos del Technical Context y las semánticas geoespaciales 
 ### Performance (SC-001..SC-003)
 
 - Carga en memoria al arranque y recorrido lineal por dominio. Con el volumen actual (~19 mil entidades), esta solución cumple SC-002/SC-003 sin introducir índices espaciales innecesarios.
-- **Capas pesadas**: se sirve GeoJSON de visualización. Si la capa de unidades (>119 MB) compromete el render en navegador, se sirve una **representación simplificada solo para visualización** (Douglas-Peucker) mientras el análisis siempre usa la geometría completa. Decisión contingente verificada en la tarea de frontend (SC-001).
+- **Capas pesadas**: se sirve GeoJSON de visualización. La capa de unidades (>100 MB) usa una **representación simplificada solo para visualización** (Douglas-Peucker) mientras el análisis siempre usa la geometría completa. Decisión verificada en la tarea de frontend (SC-001).
 - Los círculos de zona se dibujan en el frontend; los indicadores se calculan en el backend.
 - Los puntos masivos se dibujan en un único canvas por capa para evitar miles de nodos SVG; la selección conserva hit-testing por feature.
 - La UI administrativa dibuja una representación GeoJSON, pero el backend continúa siendo responsable de validar tipo de geometría, campos y tipos escalares.
@@ -181,7 +181,7 @@ src/main/java/co/edu/distrital/geoinsight/
 │   ├── download/                      # SgcDatasetDownloader
 │   └── bootstrap/                     # BootstrapRunner
 └── web/
-    ├── security/                      # SecurityConfig, CurrentUser
+    ├── security/                      # SecurityConfig
     ├── controller/                    # AuthController, LayerController, AnalysisController, AdminController
     └── dto/                           # request/response DTOs
 src/main/resources/
@@ -208,13 +208,12 @@ configurable; la espera aumenta con el número de intento. Al agotarse, el
 arranque continúa con `dataAvailable=false`, preservando FR-020 sin bloquear
 indefinidamente el uso local.
 
-### Corrección de integridad de datasets (2026-08-16)
+### Integridad de datasets
 
 El bootstrap compara cada archivo local con el conteo oficial versionado. Si
 falta, está corrupto o incompleto, se marca como no disponible y se invoca el
-descargador. Esta decisión sustituye la descripción anterior que solo exigía
-que el archivo pudiera cargarse, y alinea el plan con la spec, que es la fuente
-de verdad.
+descargador. Esta regla evita reutilizar archivos truncados y alinea el arranque
+con la spec.
 
 > **Fill ONLY if Constitution Check has violations that must be justified**
 

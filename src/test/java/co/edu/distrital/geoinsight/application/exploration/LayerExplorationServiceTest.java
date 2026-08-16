@@ -69,6 +69,19 @@ class LayerExplorationServiceTest {
         assertThat(result).extracting(GeoscienceEntity::id).containsExactlyInAnyOrder("v1", "v2");
     }
 
+    @Test
+    void metadataExposesEveryObservedValueWithoutSilentTruncation() {
+        datasets.attributes.add("NombreFalla");
+        datasets.distinctValues = java.util.stream.IntStream.range(0, 556)
+                .mapToObj(index -> "Falla " + index)
+                .map(value -> (Object) value)
+                .toList();
+
+        LayerMetadata faults = layer(Domain.FALLA_GEOLOGICA);
+
+        assertThat(faults.filterableAttributes().get("NombreFalla")).hasSize(556);
+    }
+
     private LayerMetadata layer(Domain domain) {
         return service.layers().stream()
                 .filter(l -> l.domain() == domain)
@@ -118,6 +131,7 @@ class LayerExplorationServiceTest {
     private static class FakeDatasetRepository implements DatasetRepository {
         private final Set<Domain> missing = new LinkedHashSet<>();
         private final Set<String> attributes = new LinkedHashSet<>();
+        private List<Object> distinctValues = List.of();
 
         @Override
         public List<GeoscienceEntity> findSgcByDomain(Domain domain) {
@@ -146,7 +160,7 @@ class LayerExplorationServiceTest {
 
         @Override
         public List<Object> distinctValues(Domain domain, String attribute) {
-            return List.of();
+            return distinctValues;
         }
 
         @Override
