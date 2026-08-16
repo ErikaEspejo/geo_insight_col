@@ -114,7 +114,11 @@ class AnalysisWebTest {
         assertThat(body.path("massMovements").path("count").isNumber()).isTrue();
         assertThat(body.path("massMovements").path("dataAvailable").asBoolean()).isTrue();
         assertThat(body.path("massMovements").path("byTipo").isObject()).isTrue();
+        assertThat(body.path("faults").path("byTipo").isObject()).isTrue();
+        assertThat(body.path("geologicalUnits").path("byTipo").isObject()).isTrue();
+        assertThat(body.path("tectonicDomains").path("byTipo").isObject()).isTrue();
         assertThat(body.path("volcanoes").path("count").asInt()).isGreaterThanOrEqualTo(1);
+        assertThat(body.path("volcanoes").has("byTipo")).isFalse();
         String raw = result.getResponse().getContentAsString().toLowerCase();
         for (String forbidden : new String[]{"riesgo", "amenaza", "peligrosidad", "predicci"}) {
             assertThat(raw).doesNotContain(forbidden);

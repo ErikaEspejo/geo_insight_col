@@ -59,7 +59,7 @@ La metadata de cada dominio expone: nombre legible, geometría admitida (punto/l
 - `CoordinateContextResult`: por dominio, resultado o ausencia explícita (FR-014):
   - Unidades contenientes (0..n), Dominios contenientes (0..n),
   - Falla más cercana + distancia (m), Movimiento más cercano + distancia (m), Volcán más cercano + distancia (m).
-- `ZoneBreakdown`: `dataAvailable`, conteo, distribuciones por atributos (`TIPO`, `SUBTIPO`, `CLAS_MAPA`) y entidades intersectadas. `dataAvailable=false` no equivale a conteo cero.
+- `ZoneBreakdown`: `dataAvailable`, conteo, distribución (`byTipo` por `TIPO` para movimientos — además de `bySubtipo`/`byClasMapa` — y por `Tipo` para fallas, `Edad` para unidades geológicas y `NombreDT` para dominios tectónicos), entidades intersectadas y `Sin clasificar` para registros sin el atributo. `dataAvailable=false` no equivale a conteo cero.
 - `ZoneIndicators`: cinco `ZoneBreakdown` y la zona consultada. Solo descriptivos (FR-012).
 - `ComparedZone`: composición de `ZoneIndicators` + `CoordinateContextResult` para el mismo centro; reutiliza reglas existentes, no duplica geometría.
 - `ZoneComparison`: `ComparedZone` de A y B, mismo esquema lado a lado (SC-004).

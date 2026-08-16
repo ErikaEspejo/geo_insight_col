@@ -32,9 +32,9 @@ public class ZoneAnalysisService {
         List<GeoscienceEntity> tectonicDomains = overlapping(Domain.DOMINIO_TECTONICO, zone);
         return new ZoneAnalysisResult(zone,
                 ZoneBreakdown.movements(movements, catalog.dataAvailable(Domain.MOVIMIENTO_EN_MASA)),
-                ZoneBreakdown.plain(faults, catalog.dataAvailable(Domain.FALLA_GEOLOGICA)),
-                ZoneBreakdown.plain(units, catalog.dataAvailable(Domain.UNIDAD_GEOLOGICA)),
-                ZoneBreakdown.plain(tectonicDomains, catalog.dataAvailable(Domain.DOMINIO_TECTONICO)),
+                ZoneBreakdown.faults(faults, catalog.dataAvailable(Domain.FALLA_GEOLOGICA)),
+                ZoneBreakdown.geologicalUnits(units, catalog.dataAvailable(Domain.UNIDAD_GEOLOGICA)),
+                ZoneBreakdown.tectonicDomains(tectonicDomains, catalog.dataAvailable(Domain.DOMINIO_TECTONICO)),
                 ZoneBreakdown.plain(volcanoes, catalog.dataAvailable(Domain.VOLCAN)));
     }
 

@@ -43,7 +43,7 @@ Al arrancar el backend:
 6. `ana` (USER) llama a `POST /api/admin/entities` → `403`.
 7. Abrir el login sin sesión → logotipo e imagen cargan correctamente y solo aparecen inicio de sesión y registro; no aparece SSO institucional.
 
-### E2. Exploración por capas (SC-001, SC-007, FR-001..FR-008, FR-026..FR-028, FR-039)
+### E2. Exploración por capas (SC-001, SC-007, FR-001..FR-008, FR-026..FR-028, FR-039..FR-042)
 1. Con sesión, abrir el mapa → cinco capas listadas y ninguna activa; activar capas → entidades visibles (puntos, líneas, polígonos).
 2. Desactivar una capa → sus entidades dejan de verse.
 3. Seleccionar una entidad → panel muestra atributos reales y procedencia (SGC/GEOINSIGHT).
@@ -52,6 +52,9 @@ Al arrancar el backend:
 6. Agregar dos valores del mismo atributo → unión OR; agregar otro atributo → intersección AND.
 7. La tabla de coincidencias se actualiza con cada filtro; clic en una fila → zoom y detalle. Cambiar la capa del filtro limpia los criterios anteriores.
 8. Seleccionar un volcán o movimiento en masa → el detalle presenta etiquetas y valores legibles sin fragmentación carácter por carácter.
+9. El control de capas aparece flotante en la esquina inferior derecha del mapa, con el icono convencional de capas apiladas y la etiqueta “Capas”; al abrirlo, el selector se muestra hacia arriba sin quedar oculto por el panel de entidad.
+10. Cerrar el selector con clic fuera o Escape → se cierra y el botón restablece su estado; la herramienta lateral “Explorar mapa” ya no existe en el menú.
+11. Recargar la aplicación → el panel contextual inicia colapsado y sin módulo activo; al elegir una herramienta se abre su módulo y el chevrón cambia de forma consistente al abrir/cerrar.
 
 ### E3. Consulta por coordenada (SC-002, FR-009, FR-014, FR-016, FR-029)
 1. `POST /api/context` con coordenada dentro de cobertura → unidad conteniente, dominio conteniente, falla/movimiento/volcán más cercanos con distancias.

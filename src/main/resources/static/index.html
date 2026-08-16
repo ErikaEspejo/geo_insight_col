@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="/css/point-markers.css">
   <link rel="stylesheet" href="/css/comparison.css">
+  <link rel="stylesheet" href="/css/zone-analysis.css">
+  <link rel="stylesheet" href="/css/layers.css">
 </head>
 <body>
   <div class="app-shell">
@@ -22,8 +24,7 @@
     <div class="workspace">
       <aside id="sidebar" class="sidebar">
         <nav class="tool-nav" aria-label="Herramientas principales">
-          <button id="nav-explore" data-tool="explore" class="active" type="button"><span class="nav-icon">▥</span><span>Explorar mapa</span></button>
-          <button id="nav-filters" data-tool="filters" type="button"><span class="nav-icon">⌕</span><span>Buscar y filtrar</span></button>
+          <button id="nav-filters" data-tool="filters" class="active" type="button"><span class="nav-icon">⌕</span><span>Buscar y filtrar</span></button>
           <button id="nav-context" data-tool="context" type="button"><span class="nav-icon">⌖</span><span>Consulta por coordenada</span></button>
           <button id="nav-zone" data-tool="zone" type="button"><span class="nav-icon">◉</span><span>Análisis de zona</span></button>
           <button id="nav-compare" data-tool="compare" type="button"><span class="nav-icon">▦</span><span>Comparación de zonas</span></button>
@@ -38,14 +39,8 @@
         </div>
       </aside>
 
-      <aside id="tool-drawer" class="tool-drawer">
-        <section id="panel-explore" class="tool-panel">
-          <div class="panel-heading"><div><span class="eyebrow">VISUALIZACIÓN</span><h2>Capas del mapa</h2></div></div>
-          <div id="layer-list" class="layer-list"><div class="skeleton">Cargando capas…</div></div>
-          <p class="panel-tip"><span>i</span> Selecciona una entidad en el mapa para consultar sus atributos y procedencia.</p>
-        </section>
-
-        <section id="panel-filters" class="tool-panel hidden">
+      <aside id="tool-drawer" class="tool-drawer collapsed">
+        <section id="panel-filters" class="tool-panel">
           <div class="panel-heading"><div><span class="eyebrow">EXPLORACIÓN</span><h2>Buscar y filtrar</h2></div></div>
           <p class="hint">Los criterios disponibles provienen directamente de los datos del SGC.</p>
           <label for="filter-domain">Capa</label><select id="filter-domain"></select>
@@ -110,7 +105,7 @@
           <div class="panel-heading"><div><span class="eyebrow">GUÍA DE USO</span><h2>Ayuda</h2></div></div>
           <p class="hint">GeoInsight presenta información geocientífica descriptiva. Sus resultados no representan evaluaciones de riesgo, amenaza o seguridad.</p>
           <div class="help-modules">
-            <article class="help-module"><h3>Explorar mapa</h3><p>Activa una o varias capas y haz clic sobre una entidad para consultar sus atributos y procedencia. Las capas comienzan desactivadas.</p></article>
+            <article class="help-module"><h3>Capas del mapa</h3><p>Activa o desactiva las capas desde el icono de capas en la barra superior izquierda del mapa. Las capas comienzan desactivadas; haz clic sobre una entidad para consultar sus atributos y procedencia.</p></article>
             <article class="help-module"><h3>Buscar y filtrar</h3><p>Selecciona una capa, atributo y valor. Los valores del mismo atributo se combinan con O; atributos diferentes se combinan con Y. Selecciona una fila para acercarte al registro.</p></article>
             <article class="help-module"><h3>Consulta por coordenada</h3><p>Ingresa longitud y latitud. Cuando esta herramienta está abierta también puedes hacer clic directamente en el mapa para consultar el contexto del punto.</p></article>
             <article class="help-module"><h3>Análisis de zona</h3><p>Define un centro y un radio en metros, manualmente o con “Elegir punto en el mapa”. El sistema muestra conteos y distribuciones descriptivas dentro de la zona.</p></article>
@@ -122,7 +117,35 @@
 
       <main class="map-panel">
         <div id="map"></div>
-        <button id="drawer-toggle" class="map-float-button drawer-toggle" type="button" aria-label="Ocultar panel">‹</button>
+        <div class="map-toolbar" role="group" aria-label="Controles del mapa">
+          <button id="drawer-toggle" class="map-toolbar-button drawer-toggle is-collapsed" type="button" aria-label="Abrir panel" title="Abrir panel">
+            <svg class="drawer-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <span class="map-toolbar-divider" aria-hidden="true"></span>
+          <button id="map-zoom-in" class="map-toolbar-button" type="button" aria-label="Acercar mapa" title="Acercar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <button id="map-zoom-out" class="map-toolbar-button" type="button" aria-label="Alejar mapa" title="Alejar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+          </button>
+          <span class="map-toolbar-divider" aria-hidden="true"></span>
+          <div id="layers-control" class="layers-control">
+            <button id="layers-toggle" class="layers-toggle" type="button" aria-label="Capas del mapa" title="Capas del mapa" aria-expanded="false" aria-controls="layers-dropdown">
+              <span class="layers-icon-shell" aria-hidden="true">
+                <svg class="layers-icon" width="23" height="23" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2.5 22 7.4 12 12.3 2 7.4 12 2.5Zm0 2.15L6.4 7.4 12 10.15l5.6-2.75L12 4.65Z"/>
+                  <path d="m4.15 10.65 7.85 3.9 7.85-3.9L22 11.7l-10 4.95L2 11.7l2.15-1.05Z"/>
+                  <path d="m4.15 14.65 7.85 3.9 7.85-3.9L22 15.7l-10 4.95L2 15.7l2.15-1.05Z"/>
+                </svg>
+              </span>
+            </button>
+            <div id="layers-dropdown" class="layers-dropdown hidden">
+              <div class="layers-dropdown-heading"><span class="eyebrow">VISUALIZACIÓN</span><strong>Capas del mapa</strong></div>
+              <div id="layer-list" class="layer-list"><div class="skeleton">Cargando capas…</div></div>
+              <p class="panel-tip"><span>i</span> Selecciona una entidad en el mapa para consultar sus atributos y procedencia.</p>
+            </div>
+          </div>
+        </div>
         <div id="map-status" class="map-status"><span class="pulse"></span><span>Mapa listo</span></div>
         <div id="entity-info" class="entity-card hidden"><span class="empty">Selecciona una entidad del mapa.</span></div>
         <div id="cursor-coords" class="coord-bar"><span>Coordenadas del cursor:</span><strong>—</strong><i></i><span>EPSG:4326 (WGS 84)</span></div>

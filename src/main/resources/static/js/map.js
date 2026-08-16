@@ -1,7 +1,7 @@
 // US2 — Exploración por capas con Leaflet. Todas las operaciones requieren
 // sesión; ante 401 el cliente api.js redirige a /login.html.
 (function () {
-  const map = L.map('map').setView([4.0, -73.5], 6);
+  const map = L.map('map', { zoomControl: false }).setView([4.0, -73.5], 6);
   const tileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
     attribution: '&copy; OpenStreetMap'
@@ -40,11 +40,11 @@
   }
 
   const STYLE = {
-    MOVIMIENTO_EN_MASA: { color: '#e45756', radius: 3.5, fillOpacity: 0.82, geometry: 'point' },
+    MOVIMIENTO_EN_MASA: { color: '#e45756', radius: 4, fillOpacity: 0.82, geometry: 'point' },
     FALLA_GEOLOGICA: { color: '#8b5bd6', weight: 1.7, geometry: 'line' },
     UNIDAD_GEOLOGICA: { color: '#79c957', weight: 0.8, fillOpacity: 0.18, geometry: 'polygon' },
     DOMINIO_TECTONICO: { color: '#f5bf18', weight: 1.2, fillOpacity: 0.12, geometry: 'polygon' },
-    VOLCAN: { color: '#f47a32', radius: 6, fillOpacity: 0.9, geometry: 'triangle' }
+    VOLCAN: { color: '#f47a32', radius: 7, fillOpacity: 0.9, geometry: 'triangle' }
   };
 
   const state = {
@@ -55,7 +55,7 @@
     loadVersion: {}, // domain -> versión de la última carga solicitada
     visibleFeatures: {},
     filterDomain: null,
-    activeTool: 'explore'
+    activeTool: 'filters'
   };
 
   const zoneCircles = [];
@@ -188,10 +188,10 @@
     const circle = L.circle([lat, lon], {
       radius: radiusMeters,
       color: '#0284c7',
-      weight: 2,
+      weight: 2.5,
       fill: true,
       fillColor: '#38bdf8',
-      fillOpacity: 0.08,
+      fillOpacity: 0.1,
       dashArray: '7 5'
     }).addTo(map);
     const marker = L.marker([lat, lon], {
@@ -210,6 +210,67 @@
   function clearZoneCircles() {
     zoneCircles.forEach((circle) => map.removeLayer(circle));
     zoneCircles.length = 0;
+  }
+
+  // Visualización del análisis de zona (FR-010): las entidades encontradas se
+  // dibujan por dominio sobre el mapa (modo "todos"); un indicador puede
+  // resaltar únicamente un subconjunto (modo "resaltado"). La geometría de zona
+  // (círculo) permanece siempre identificable.
+  const zoneEntitiesLayers = {};
+
+  function zoneEntityFeature(entity) {
+    return {
+      type: 'Feature',
+      id: entity.id,
+      properties: { ...(entity.attributes || {}), origin: entity.origin, _domain: entity.domain },
+      geometry: entity.geometry
+    };
+  }
+
+  function renderZoneEntities(domain, features, mode) {
+    const previous = zoneEntitiesLayers[domain];
+    if (previous && map.hasLayer(previous)) map.removeLayer(previous);
+    delete zoneEntitiesLayers[domain];
+    if (!features || features.length === 0) return;
+    const style = domainStyle(domain);
+    const highlight = mode === 'highlight';
+    let layer;
+    if (style.geometry === 'point' || style.geometry === 'triangle') {
+      layer = new CanvasPointLayer(domain, features, highlight
+        ? { color: '#0b3b66', radius: 5.5, outlineWidth: 2.2, outlineColor: '#7dd3fc', geometry: 'point' }
+        : { color: style.color, radius: style.radius || 4, geometry: 'point' });
+    } else {
+      layer = L.geoJSON({ type: 'FeatureCollection', features }, {
+        pane: style.geometry === 'polygon' ? 'geoPolygons' : 'geoLines',
+        style: highlight
+          ? { color: '#0b3b66', weight: 3.2, fillColor: style.color, fillOpacity: 0.4 }
+          : { color: style.color, weight: style.weight, fillOpacity: style.fillOpacity }
+      });
+      layer.on('click', (event) => showEntity(event.propagatedFrom.feature));
+    }
+    zoneEntitiesLayers[domain] = layer;
+    layer.addTo(map);
+  }
+
+  function clearZoneEntities() {
+    Object.keys(zoneEntitiesLayers).forEach((domain) => {
+      const layer = zoneEntitiesLayers[domain];
+      if (map.hasLayer(layer)) map.removeLayer(layer);
+      delete zoneEntitiesLayers[domain];
+    });
+  }
+
+  function showZoneAnalysisDomain(domain, entities) {
+    renderZoneEntities(domain, (entities || []).map(zoneEntityFeature), 'all');
+  }
+
+  function highlightZoneAnalysis(domain, features) {
+    renderZoneEntities(domain, features, 'highlight');
+  }
+
+  function clearZoneAnalysis() {
+    clearZoneCircles();
+    clearZoneEntities();
   }
 
   function drawComparisonZones(zoneA, zoneB) {
@@ -247,6 +308,10 @@
     drawZoneCircle,
     drawComparisonZones,
     clearZoneCircles,
+    showZoneAnalysisDomain,
+    highlightZoneAnalysis,
+    clearZoneAnalysis,
+    clearZoneEntities,
     startCoordinatePick,
     cancelCoordinatePick,
     startGeometryDraw,
@@ -314,18 +379,20 @@
     },
 
     drawPoint(context, point) {
+      const radius = this.style.radius || (this.domain === 'VOLCAN' ? 7 : 4);
+      const outline = this.style.outlineWidth || 1.25;
       context.save();
       context.fillStyle = this.style.color;
-      context.strokeStyle = '#ffffff';
-      context.lineWidth = 1.25;
+      context.strokeStyle = this.style.outlineColor || '#ffffff';
+      context.lineWidth = outline;
       context.beginPath();
       if (this.domain === 'VOLCAN') {
-        context.moveTo(point.x, point.y - 7);
-        context.lineTo(point.x + 7, point.y + 6);
-        context.lineTo(point.x - 7, point.y + 6);
+        context.moveTo(point.x, point.y - radius);
+        context.lineTo(point.x + radius, point.y + radius * 0.86);
+        context.lineTo(point.x - radius, point.y + radius * 0.86);
         context.closePath();
       } else {
-        context.arc(point.x, point.y, 4, 0, Math.PI * 2);
+        context.arc(point.x, point.y, radius, 0, Math.PI * 2);
       }
       context.fill();
       context.stroke();
@@ -675,7 +742,17 @@
     showEntity(feature);
   }
 
-  const TOOLS = ['explore', 'filters', 'context', 'zone', 'compare', 'admin', 'help'];
+  const TOOLS = ['filters', 'context', 'zone', 'compare', 'admin', 'help'];
+
+  function setDrawerCollapsed(collapsed) {
+    const drawer = document.getElementById('tool-drawer');
+    const button = document.getElementById('drawer-toggle');
+    drawer.classList.toggle('collapsed', collapsed);
+    button.classList.toggle('is-collapsed', collapsed);
+    button.setAttribute('aria-label', collapsed ? 'Abrir panel' : 'Ocultar panel');
+    button.title = collapsed ? 'Abrir panel' : 'Ocultar panel';
+    setTimeout(() => map.invalidateSize(), 260);
+  }
 
   function activateTool(tool) {
     cancelCoordinatePick();
@@ -688,8 +765,31 @@
       document.getElementById(`panel-${name}`).classList.toggle('hidden', name !== tool);
       document.getElementById(`nav-${name}`).classList.toggle('active', name === tool);
     });
-    document.getElementById('tool-drawer').classList.remove('collapsed');
-    setTimeout(() => map.invalidateSize(), 260);
+    setDrawerCollapsed(false);
+  }
+
+  function bindLayersControl() {
+    const button = document.getElementById('layers-toggle');
+    const control = document.getElementById('layers-control');
+    const dropdown = document.getElementById('layers-dropdown');
+    button.addEventListener('click', () => {
+      const hidden = dropdown.classList.toggle('hidden');
+      button.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+      button.classList.toggle('active', !hidden);
+    });
+    document.addEventListener('click', (event) => {
+      if (!dropdown.classList.contains('hidden') && !control.contains(event.target)) closeLayersDropdown();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !dropdown.classList.contains('hidden')) closeLayersDropdown();
+    });
+  }
+
+  function closeLayersDropdown() {
+    const button = document.getElementById('layers-toggle');
+    document.getElementById('layers-dropdown').classList.add('hidden');
+    button.setAttribute('aria-expanded', 'false');
+    button.classList.remove('active');
   }
 
   function bindToolNavigation() {
@@ -700,11 +800,14 @@
       document.getElementById('sidebar').classList.toggle('collapsed');
       setTimeout(() => map.invalidateSize(), 260);
     });
-    document.getElementById('drawer-toggle').addEventListener('click', (event) => {
-      const collapsed = document.getElementById('tool-drawer').classList.toggle('collapsed');
-      event.currentTarget.textContent = collapsed ? '›' : '‹';
-      setTimeout(() => map.invalidateSize(), 260);
+    document.getElementById('drawer-toggle').addEventListener('click', () => {
+      const drawer = document.getElementById('tool-drawer');
+      const willCollapse = !drawer.classList.contains('collapsed');
+      if (!willCollapse && !TOOLS.includes(state.activeTool)) activateTool('filters');
+      else setDrawerCollapsed(willCollapse);
     });
+    document.getElementById('map-zoom-in').addEventListener('click', () => map.zoomIn());
+    document.getElementById('map-zoom-out').addEventListener('click', () => map.zoomOut());
   }
 
   function bindCursorCoordinates() {
@@ -774,6 +877,7 @@
     });
     buildLayerPanel();
     bindFilterBuilder();
+    bindLayersControl();
     bindToolNavigation();
     bindCursorCoordinates();
     rebuildFilterBuilder(null);

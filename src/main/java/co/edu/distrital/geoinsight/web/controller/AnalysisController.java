@@ -120,7 +120,11 @@ public class AnalysisController {
         node.set("count", objectMapper.valueToTree(breakdown.count()));
         if (breakdown.byTipo() != null) {
             node.set("byTipo", distributionToJson(breakdown.byTipo()));
+        }
+        if (breakdown.bySubtipo() != null) {
             node.set("bySubtipo", distributionToJson(breakdown.bySubtipo()));
+        }
+        if (breakdown.byClasMapa() != null) {
             node.set("byClasMapa", distributionToJson(breakdown.byClasMapa()));
         }
         node.set("entities", entitiesToJson(breakdown.entities()));

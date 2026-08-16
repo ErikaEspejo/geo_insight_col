@@ -121,12 +121,12 @@ Resuelve todos los puntos del Technical Context y las semánticas geoespaciales 
 ### Frontend (`src/main/resources/static/`)
 
 - `login.html`: identidad visual local, inicio de sesión y registro (rol usuario), sin SSO.
-- `index.html`: shell autenticado sin búsqueda global ni controles duplicados, navegación por módulos, mapa Leaflet, paneles de exploración/filtros/contexto/zona/comparación/ayuda y administración solo para ADMIN.
-- `js/map.js`: capas inicialmente inactivas; puntos densos en Canvas; protección contra respuestas asíncronas obsoletas; selección de entidades; tabla de filtros con enfoque; selectores explícitos de coordenadas; centros/radios; dibujo administrativo Point/LineString/Polygon.
+- `index.html`: shell autenticado sin búsqueda global ni controles duplicados, navegación por módulos, mapa Leaflet, control flotante de capas, paneles de filtros/contexto/zona/comparación/ayuda y administración solo para ADMIN.
+- `js/map.js`: capas inicialmente inactivas; control flotante de capas en la esquina inferior derecha con icono convencional y selector desplegable; herramienta lateral “Explorar mapa” eliminada; panel contextual inicialmente colapsado; puntos densos en Canvas; protección contra respuestas asíncronas obsoletas; selección de entidades; tabla de filtros con enfoque; selectores explícitos de coordenadas; centros/radios; dibujo administrativo Point/LineString/Polygon.
 - `js/compare.js`: tarjetas por dominio, contexto central, vecinos/distancias, estados explícitos, observaciones descriptivas cerradas y tabla resumen secundaria.
 - `js/admin.js`: formulario dinámico desde metadata, coerción tipada, vocabularios categóricos, lista persistente “Mis entidades”, capa administrativa por color y modal propio de eliminación.
 - `js/auth.js`: login y registro local; no incluye SSO institucional.
-- `css/styles.css`.
+- `css/styles.css` y `css/layers.css`: sistema visual general y control flotante de capas (esquina inferior derecha) con estados normal, hover, foco y activo.
 - `lib/leaflet/`: Leaflet vendoreado localmente (offline).
 
 ### Performance (SC-001..SC-003)

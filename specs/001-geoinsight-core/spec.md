@@ -51,6 +51,9 @@ El usuario explora los cinco dominios geocientíficos como capas diferenciadas s
 8. **Given** el usuario cambia la capa del constructor de filtros, **When** se carga la nueva capa, **Then** se eliminan los filtros de la capa anterior.
 9. **Given** el usuario abre el mapa, **When** aún no activa capas, **Then** ninguna capa temática se encuentra activa por defecto.
 10. **Given** una entidad puntual seleccionada, **When** se abre su detalle, **Then** etiquetas y valores permanecen legibles sin fragmentarse carácter por carácter ni exigir desplazamiento horizontal innecesario.
+11. **Given** el mapa visible, **When** el usuario ubica el control de capas en la esquina inferior derecha, **Then** encuentra el icono convencional de capas apiladas con la etiqueta “Capas” y, al pulsarlo, el selector se abre hacia arriba sin quedar oculto por el panel de entidad.
+12. **Given** el selector de capas abierto, **When** el usuario hace clic fuera del control o presiona Escape, **Then** el selector se cierra y el estado expandido del botón se restablece.
+13. **Given** la aplicación recién abierta, **When** el usuario aún no elige una herramienta, **Then** el panel contextual permanece colapsado y no muestra ningún módulo vacío; al elegir una herramienta se abre el módulo correspondiente.
 
 ---
 
@@ -190,6 +193,9 @@ El administrador crea, edita y elimina entidades de origen GEOINSIGHT en cualqui
 - **FR-037**: La navegación autenticada DEBE exponer solo controles funcionales; la ayuda se accede desde su módulo y la identidad de sesión se muestra una sola vez en el bloque inferior del menú, sin barra de búsqueda global no implementada.
 - **FR-038**: Los campos de longitud y latitud para zona y comparación DEBEN iniciar vacíos con ejemplos de formato, y poder completarse tanto por teclado como mediante el selector explícito del mapa.
 - **FR-039**: El detalle de una entidad DEBE adaptar la distribución de etiquetas y valores al ancho disponible para conservar su legibilidad.
+- **FR-040**: El control flotante de capas DEBE ubicarse en la esquina inferior derecha del mapa, ser compacto, combinar el icono convencional de capas apiladas con la etiqueta “Capas” y mantener tooltip, etiqueta accesible y estados de interacción sin alterar su operación.
+- **FR-041**: El selector de capas DEBE abrirse hacia arriba sobre el control, contener la misma lista de capas por dominio y DEBE cerrarse con un clic fuera del control o con la tecla Escape; la herramienta lateral “Explorar mapa” NO DEBE existir porque el control flotante es el único punto de activación de capas.
+- **FR-042**: El panel contextual DEBE iniciar colapsado y sin módulo activo; al elegir una herramienta DEBE abrirse con el módulo correspondiente y el estado visual del botón de colapso DEBE coincidir con el panel.
 
 ### Key Entities *(include if feature involves data)*
 

@@ -149,6 +149,8 @@ scripts/download-datasets.ps1         # descarga manual (base del bootstrap)
 - [x] T035 [US4] `ZoneAnalysisService` en `src/main/java/co/edu/distrital/geoinsight/application/analysis/` (movimientos/volcanes a distancia ≤ radio, fallas a distancia centro-línea ≤ radio, unidades/dominios que contienen el centro o intersectan la circunferencia; indicadores descriptivos)
 - [x] T036 [US4] Extender `AnalysisController`: POST `/api/zones/analyze` (validación radio > 0) en `src/main/java/co/edu/distrital/geoinsight/web/controller/AnalysisController.java`
 - [x] T037 [US4] Frontend: formulario de zona + círculo (centro+radio) en el mapa + panel de indicadores en `src/main/resources/static/js/zone.js` + `index.html`
+- [x] T037a [US4] Extender distribuciones por dominio al atributo de clasificación real de cada dataset (fallas `Tipo`, unidades `Edad`, dominios `NombreDT`; volcanes sin distribución) y agrupar registros sin el atributo en `Sin clasificar` (suma = `count`), con contrato actualizado en `contracts/api.md` y cobertura en `ZoneBreakdownTest`/`AnalysisWebTest`.
+- [x] T037b [US4] Rediseñar el panel de análisis de zona: bloques por dominio con distribución, tarjetas filtrables multi-selección que resaltan en el mapa y resumen «N dominios en el mapa», barras interactivas solo en movimientos en masa.
 
 **Checkpoint**: US4 funcional e independientemente testeable.
 
@@ -206,7 +208,7 @@ scripts/download-datasets.ps1         # descarga manual (base del bootstrap)
 
 ## Phase 10: UX geocientífica y administración segura
 
-**Purpose**: Sincronizar la experiencia implementada con FR-026..FR-039 sin alterar las reglas espaciales.
+**Purpose**: Sincronizar la experiencia implementada con FR-026..FR-042 sin alterar las reglas espaciales.
 
 - [x] T051 [US2] Capas inicialmente inactivas, render Canvas para puntos densos y control de respuestas asíncronas obsoletas en `static/js/map.js`.
 - [x] T052 [US2] Filtros OR por valores del mismo atributo y AND entre atributos; limpieza al cambiar capa; tabla de resultados con zoom en `LayerExplorationService`, `LayerController` y `static/js/map.js`.
@@ -217,7 +219,10 @@ scripts/download-datasets.ps1         # descarga manual (base del bootstrap)
 - [x] T057 [US6] Formulario administrativo dinámico con valores categóricos reales y controles tipados; eliminación de captura JSON libre.
 - [x] T058 [US6] Dibujo Point/LineString/Polygon sin dependencia externa; lista/capa “Mis entidades”, colores por dominio y modal propio de eliminación.
 - [x] T059 [US1..US6] Rediseño responsive de login con recursos públicos y sin SSO, shell sin controles redundantes, placeholders de coordenadas, detalle legible y ayuda contextual por rol.
-- [x] T060 Pruebas de regresión y contrato actualizadas; suite completa verificada con 73 tests en verde.
+- [x] T060 Pruebas de regresión y contrato actualizadas; suite completa verificada con 77 tests en verde.
+- [x] T061 [US2] Mover el selector de capas a un control flotante en la esquina inferior derecha del mapa, con icono convencional de capas apiladas, etiqueta «Capas», desplegable que abre hacia arriba y cierre por clic fuera o Escape, conservando tooltip, etiqueta accesible, foco visible y estado activo.
+- [x] T062 [US2] Eliminar la herramienta lateral «Explorar mapa» y su panel; la lista de capas queda únicamente en el control flotante y la ayuda se actualiza a «Capas del mapa».
+- [x] T063 [US2] Inicializar el panel contextual colapsado y sin módulo activo, sincronizando chevrón y etiqueta del botón de colapso con el estado cerrado.
 
 ---
 

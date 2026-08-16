@@ -131,6 +131,8 @@ Tipos confirmados en los datos locales:
 ## 7. Decisiones de interacción cartográfica
 
 - Las capas temáticas inician desactivadas. Cada toggle invalida solicitudes pendientes para impedir que una respuesta tardía reactive una capa apagada.
+- El control de capas flota en la esquina inferior derecha del mapa, sobre la barra de coordenadas, y combina el símbolo cartográfico convencional de tres capas apiladas (SVG) con la etiqueta «Capas». El desplegable abre hacia arriba, conserva tooltip, etiqueta accesible, foco visible y estado expandido, y se cierra con clic fuera o Escape.
+- La herramienta lateral «Explorar mapa» se eliminó: la lista de capas vive únicamente en el control flotante. El panel contextual inicia colapsado y sin módulo activo; el zoom nativo de Leaflet permanece sin superposición con el control de capas.
 - Los puntos densos (6826 movimientos) se renderizan en canvas con hit-testing propio; líneas y polígonos permanecen en Leaflet GeoJSON.
 - La consulta por coordenada responde a clics únicamente cuando su módulo está activo. Zona A, Zona B y análisis de zona usan un selector explícito de un solo clic.
 - Los campos de coordenadas permanecen vacíos y muestran el formato esperado mediante placeholders; el selector del mapa reemplaza esos valores cuando se activa explícitamente.

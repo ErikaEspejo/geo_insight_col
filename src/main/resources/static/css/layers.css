@@ -1,0 +1,127 @@
+.map-toolbar {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 1060;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  color: #344054;
+  background: rgba(255, 255, 255, .96);
+  border: 1px solid rgba(211, 220, 232, .94);
+  border-radius: 12px;
+  box-shadow: 0 7px 22px rgba(16, 24, 40, .14);
+  backdrop-filter: blur(8px);
+}
+
+.map-toolbar-button,
+.layers-toggle {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  color: #44536a;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background .15s, color .15s, box-shadow .15s;
+}
+
+.map-toolbar-button:hover,
+.layers-toggle:hover {
+  color: #1f5fd6;
+  background: #edf4ff;
+  border-color: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+.map-toolbar-button:focus-visible,
+.layers-toggle:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+}
+
+.map-toolbar-divider {
+  width: 1px;
+  height: 24px;
+  margin: 0 2px;
+  background: #dfe5ed;
+}
+
+.drawer-chevron {
+  transition: transform .2s ease;
+}
+
+.drawer-toggle.is-collapsed .drawer-chevron {
+  transform: rotate(180deg);
+}
+
+.layers-control {
+  position: static;
+  display: block;
+}
+
+.layers-toggle {
+  color: #315f9f;
+}
+
+.layers-icon-shell {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  color: inherit;
+  background: transparent;
+  border-radius: 8px;
+  transition: color .15s, background .15s;
+}
+
+.layers-toggle .layers-icon {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.layers-toggle.active {
+  color: #fff;
+  background: linear-gradient(145deg, #4a83ef, #2866df);
+}
+
+.layers-toggle.active .layers-icon-shell {
+  color: #fff;
+  background: transparent;
+}
+
+.layers-dropdown {
+  position: absolute;
+  right: auto;
+  left: 0;
+  top: calc(100% + 10px);
+  width: 300px;
+  max-height: calc(100vh - 180px);
+  overflow: auto;
+  background: #fff;
+  border: 1px solid #dfe5ec;
+  border-radius: 12px;
+  box-shadow: 0 16px 38px rgba(16, 24, 40, .16);
+  padding: 12px;
+  z-index: 1000;
+}
+
+.layers-dropdown-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eef1f5;
+  margin-bottom: 8px;
+}
+
+.layers-dropdown-heading strong {
+  font-size: 13px;
+  color: #172033;
+}

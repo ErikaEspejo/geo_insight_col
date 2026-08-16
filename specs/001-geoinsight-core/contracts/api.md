@@ -115,14 +115,22 @@ Indicadores descriptivos de una zona (FR-010).
 ```json
 {
   "zone": { "lon": ..., "lat": ..., "radiusMeters": 10000 },
-  "massMovements": { "dataAvailable": true, "count": 12, "byTipo": { "D": 8, "C": 4 }, "bySubtipo": {...}, "byClasMapa": {...}, "entities": [...] },
-  "faults": { "dataAvailable": true, "count": 3, "entities": [...] },
-  "geologicalUnits": { "dataAvailable": true, "count": 4, "entities": [...] },
-  "tectonicDomains": { "dataAvailable": true, "count": 1, "entities": [...] },
+  "massMovements": { "dataAvailable": true, "count": 12, "byTipo": { "Deslizamiento": 8, "Caida": 4 }, "bySubtipo": {...}, "byClasMapa": {...}, "entities": [...] },
+  "faults": { "dataAvailable": true, "count": 3, "byTipo": { "Falla": 2, "Lineamiento": 1 }, "entities": [...] },
+  "geologicalUnits": { "dataAvailable": true, "count": 4, "byTipo": { "Cuaternario": 2, "Jurásico": 2 }, "entities": [...] },
+  "tectonicDomains": { "dataAvailable": true, "count": 1, "byTipo": { "Basamento Amazónico": 1 }, "entities": [...] },
   "volcanoes": { "dataAvailable": true, "count": 0, "entities": [] }
 }
 ```
-`400` radio no válido. Sin conclusiones de riesgo (FR-012).
+`400` radio no válido. Sin conclusiones de riesgo (FR-012). Cada dominio
+incluye su distribución según el atributo de clasificación del dataset:
+`massMovements.byTipo` por `TIPO` (además de `bySubtipo` por `SUBTIPO` y
+`byClasMapa` por `CLAS_MAPA`), `faults.byTipo` por `Tipo`,
+`geologicalUnits.byTipo` por `Edad` y `tectonicDomains.byTipo` por `NombreDT`.
+`volcanoes` no ofrece distribución porque el dataset no tiene atributo
+categórico. Los registros con el atributo vacío o ausente se agrupan
+explícitamente bajo la categoría `Sin clasificar`; así, la sumatoria de cada
+distribución siempre equivale a `count`.
 
 ### `POST /api/zones/compare`
 Comparación de dos zonas (FR-011).

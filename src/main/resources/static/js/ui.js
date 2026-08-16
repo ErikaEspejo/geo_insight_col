@@ -13,6 +13,16 @@ const ui = {
     return `${meters.toLocaleString('es-CO', { maximumFractionDigits: 0 })} m`;
   },
 
+  formatNumber(value) {
+    return Number(value).toLocaleString('es-CO');
+  },
+
+  formatPercent(part, total) {
+    if (!Number.isFinite(total) || total <= 0) return '0 %';
+    const percent = (part / total) * 100;
+    return `${percent.toLocaleString('es-CO', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
+  },
+
   pointText(lon, lat) {
     return `${lon.toLocaleString('es-CO', { maximumFractionDigits: 6 })}, ${lat.toLocaleString('es-CO', { maximumFractionDigits: 6 })}`;
   },
@@ -47,11 +57,5 @@ const ui = {
 
   showError(container, message) {
     container.innerHTML = `<span class="error-text">${ui.escapeHtml(message)}</span>`;
-  },
-
-  distributionTable(distribution) {
-    const entries = Object.entries(distribution || {});
-    return entries.length === 0 ? '<li>Sin resultados.</li>'
-      : `<ul>${entries.map(([value, count]) => `<li>${ui.escapeHtml(value)}: ${count}</li>`).join('')}</ul>`;
   }
 };
