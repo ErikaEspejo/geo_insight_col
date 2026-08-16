@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -81,7 +82,25 @@ class AdminWebTest {
         mockMvc.perform(post("/api/admin/entities").session(userSession)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"domain\":\"VOLCAN\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[-74.0,4.7]},\"attributes\":{\"NombreVolcan\":\"Nuevo\"}}"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").isNotEmpty());
+    }
+
+    @Test
+    void unauthenticatedUserCannotAccessAnyAdministrativeContract() throws Exception {
+        mockMvc.perform(get("/api/admin/entities"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").isNotEmpty());
+        mockMvc.perform(post("/api/admin/entities").contentType(MediaType.APPLICATION_JSON).content("{}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").isNotEmpty());
+        mockMvc.perform(put("/api/admin/entities/any").contentType(MediaType.APPLICATION_JSON).content("{}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").isNotEmpty());
+        mockMvc.perform(delete("/api/admin/entities/any"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").isNotEmpty());
     }
 
     @Test

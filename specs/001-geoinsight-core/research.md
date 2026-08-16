@@ -89,8 +89,9 @@ exige un atributo descriptivo mínimo tomado del esquema real: movimientos
 `TIPO`, fallas `NombreFalla`, unidades `SimboloUC`, dominios tectónicos
 `NombreDT` y volcanes `NombreVolcan`. Esta es una regla de calidad para altas y
 ediciones propias, no una inferencia de que el campo esté completo en el SGC.
-Los 2816 valores nulos observados en `NombreFalla` y los 14 valores vacíos de
-`NombreVolcan` se conservan intactos en los registros SGC.
+Los 2816 valores nulos observados en `NombreFalla`, los 14 valores vacíos y el
+valor compuesto solo por un espacio de `NombreVolcan` se conservan intactos en
+los registros SGC. El perfil completo está en `data-dictionary.md`.
 
 Tipos confirmados en los datos locales:
 

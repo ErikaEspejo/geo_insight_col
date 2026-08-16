@@ -78,8 +78,6 @@ public class SecurityConfig {
                                 "/css/login-exact.css", "/css/login-assets.css",
                                 "/js/api.js", "/js/auth.js",
                                 "/images/geoinsight-logo.png", "/images/colombian-volcanic-landscape.png",
-                                "/assets/colombian-volcanic-landscape.png",
-                                "/assets/colombian-volcanic-landscape-v2.png",
                                 "/api/auth/register", "/api/auth/login", "/api/auth/logout").permitAll()
                         .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
                         .anyRequest().authenticated())

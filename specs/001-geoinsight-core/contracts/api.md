@@ -4,7 +4,33 @@
 
 Formato JSON. Errores: `{ "message": "..." }` con el código HTTP correspondiente (400 validación, 401 no autenticado, 403 sin permiso, 404 no encontrado, 409 conflicto).
 
-## Autenticación
+## Alcance del contrato
+
+Este documento distingue dos superficies HTTP diferentes:
+
+- **rutas del frontend:** páginas y recursos estáticos que el navegador solicita para presentar la interfaz;
+- **endpoints REST del backend:** operaciones bajo `/api/**` que reciben o devuelven JSON o GeoJSON.
+
+Las rutas del frontend no constituyen una API y los endpoints del backend no representan pantallas navegables.
+
+## Rutas del frontend
+
+| Método y ruta | Recurso | Acceso |
+|---|---|---|
+| `GET /login.html` | pantalla de inicio de sesión y registro | público |
+| `GET /` | entrada principal de la aplicación | autenticado |
+| `GET /index.html` | interfaz cartográfica principal | autenticado |
+| `GET /css/styles.css` | estilos mínimos compartidos | público |
+| `GET /css/login*.css` | estilos de la pantalla de acceso | público |
+| `GET /js/api.js` | cliente HTTP usado durante el acceso | público |
+| `GET /js/auth.js` | comportamiento de login y registro | público |
+| `GET /images/geoinsight-logo.png` | identidad visual del acceso | público |
+| `GET /images/colombian-volcanic-landscape.png` | imagen del acceso | público |
+| demás recursos `/css/**`, `/js/**`, `/images/**`, `/assets/**` y `/lib/**` | interfaz completa y Leaflet local | autenticado |
+
+Cuando un navegador solicita una ruta protegida sin sesión y acepta HTML, Spring Security lo redirige a `/login.html`.
+
+## Endpoints REST del backend
 
 ### Disponibilidad del servidor
 
@@ -14,9 +40,11 @@ conexión aceptada nunca observa el estado transitorio del bootstrap. Si un
 dataset continúa ausente después de agotar los intentos, `GET /api/layers`
 informa `dataAvailable=false` para ese dominio (FR-020).
 
-Todo acceso a la aplicación exige sesión (FR-021). Sin sesión, los navegadores son redirigidos a `login.html` y las APIs responden 401.
+Los endpoints protegidos responden `401` en formato JSON cuando no existe sesión. Las rutas administrativas responden `403` cuando la sesión pertenece a un usuario sin rol `ADMIN`.
 
-### `POST /api/auth/register`
+### Autenticación
+
+#### `POST /api/auth/register`
 
 Los recursos estáticos necesarios para presentar `login.html` son la única
 excepción a la autenticación. `/api/basemap/**` exige sesión y responde `401`
@@ -31,21 +59,21 @@ Registra una cuenta de consulta. **Siempre** crea rol `USER` (FR-022).
 - `400` username/password inválidos (longitud mínima)
 - `409` username ya existe
 
-### `POST /api/auth/login`
+#### `POST /api/auth/login`
 ```json
 { "username": "ana", "password": "secreta123" }
 ```
 - `200` → `{ "username": "ana", "role": "USER", "admin": false }`
 - `401` credenciales incorrectas
 
-### `POST /api/auth/logout`
+#### `POST /api/auth/logout`
 - `204 No Content`
 
-### `GET /api/auth/me`
+#### `GET /api/auth/me`
 - `200` → `{ "username": "...", "role": "USER"|"ADMIN", "admin": bool }`
 - `401` sin sesión
 
-## Exploración
+### Exploración
 
 ### `GET /api/layers`
 Metadatos de los cinco dominios para construir el control de capas y filtros (FR-008, FR-018).
@@ -97,7 +125,7 @@ con atributo inexistente → `400`.
 ```
 - `404` no existe
 
-## Análisis
+### Análisis
 
 ### `POST /api/context`
 Contexto geocientífico de una coordenada (FR-009).
@@ -183,7 +211,7 @@ Comparación de dos zonas (FR-011).
   conteo cero de un dataset no disponible (FR-014, FR-020). Las distancias son
   descriptivas y no expresan riesgo, amenaza ni seguridad (FR-012).
 
-## Administración (rol ADMIN)
+### Administración (rol ADMIN)
 
 Todas responden `401` sin sesión y `403` para rol USER.
 
@@ -220,7 +248,7 @@ Actualiza una entidad GEOINSIGHT (FR-005). Id de origen SGC → `403` (FR-003).
 Elimina una entidad GEOINSIGHT (FR-005). Id SGC → `403`.
 - `204` | `404` no existe | `403` SGC
 
-## Fondo vectorial offline
+### Fondo vectorial offline
 
 ### `GET /api/basemap/colombia`
 GeoJSON `FeatureCollection` con contorno de Colombia (+ departamentos si disponibles) para fondo local sin conexión.

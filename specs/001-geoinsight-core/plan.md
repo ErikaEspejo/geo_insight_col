@@ -78,6 +78,9 @@ Resuelve todos los puntos del Technical Context y las semánticas geoespaciales 
 
 ### Dominio (`src/main/java/co/edu/distrital/geoinsight/domain/`)
 
+El diagrama de clases y las relaciones de herencia, composición e
+implementación de interfaces están formalizados en [design.md](./design.md).
+
 - `Coordinate` (record): `lon, lat` validados (rango WGS84) + distancia haversine a otra coordenada.
 - Geometría OOP (`Geometry` abstracta; `Point`, `LineString`, `Polygon`, `MultiPoint`, `MultiLineString`, `MultiPolygon`), con comportamiento:
   - `distanceTo(Coordinate)` (mínima distancia punto-geometría, haversine + punto-segmento).
@@ -146,7 +149,10 @@ Resuelve todos los puntos del Technical Context y las semánticas geoespaciales 
 specs/001-geoinsight-core/
 ├── plan.md              # This file (/speckit.plan command output)
 ├── research.md          # Phase 0 output (/speckit.plan command)
+├── data-dictionary.md   # Diccionario formal derivado de los GeoJSON completos
 ├── data-model.md        # Phase 1 output (/speckit.plan command)
+├── design.md            # Diagramas UML/Mermaid y decisiones POO
+├── traceability.md      # Matriz datos → requisitos → código → pruebas
 ├── quickstart.md        # Phase 1 output (/speckit.plan command)
 ├── contracts/           # Phase 1 output (/speckit.plan command)
 │   └── api.md           # REST API contracts

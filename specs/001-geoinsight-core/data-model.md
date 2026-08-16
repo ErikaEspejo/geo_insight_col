@@ -2,7 +2,10 @@
 
 **Feature**: `001-geoinsight-core` | **Date**: 2026-08-15 | **Plan**: [plan.md](./plan.md)
 
-Modelo de dominio derivado de `spec.md` y de los datasets reales (ver `research.md` §2).
+Modelo de dominio derivado de `spec.md` y de los datasets reales (ver
+`research.md` §2). El [diseño OO](./design.md) contiene los diagramas UML y el
+[diccionario formal](./data-dictionary.md) documenta tipo, nulabilidad y
+restricciones de cada campo observado.
 
 ## Entidades
 

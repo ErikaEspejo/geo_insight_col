@@ -9,6 +9,44 @@ Desarrollo guiado por especificaciones (`specs/001-geoinsight-core/`): la
 especificación, el plan, el contrato REST y el quickstart de validación son la
 fuente de verdad del comportamiento esperado.
 
+La evidencia académica SDD incluye el
+[diccionario formal](specs/001-geoinsight-core/data-dictionary.md), el
+[diseño OO con diagramas](specs/001-geoinsight-core/design.md) y la
+[matriz de trazabilidad](specs/001-geoinsight-core/traceability.md).
+
+## Organización del repositorio
+
+El archivo ZIP del Entregable 2 conserva esta carpeta como raíz del proyecto. La organización es la siguiente:
+
+| Ruta | Contenido y responsabilidad |
+|---|---|
+| `src/main/java/` | Código Java de producción, separado en dominio, aplicación, infraestructura y web. |
+| `src/main/resources/static/` | Frontend HTML, CSS y JavaScript, junto con Leaflet y recursos visuales locales. |
+| `src/main/resources/basemap/` | Fondo vectorial mínimo de Colombia para funcionamiento sin conexión. |
+| `src/test/java/` | Pruebas unitarias, de servicios, infraestructura, contratos web y rendimiento. |
+| `specs/001-geoinsight-core/` | Especificación canónica, plan, investigación, modelo, contrato REST, tareas y trazabilidad. |
+| `docs/` | Documentación consolidada, contexto funcional, interpretación del desarrollo e índice UML. |
+| `config/` | Configuración versionada de la cuenta administrativa sembrada. |
+| `scripts/` | Utilidades operativas, incluida la descarga manual de datasets SGC. |
+| `.mvn/`, `mvnw`, `mvnw.cmd` | Maven Wrapper para compilar sin depender de una instalación global de Maven. |
+| `pom.xml` | Dependencias, versión de Java, plugins y configuración de ejecución de pruebas. |
+| `data/` | Persistencia local generada durante la ejecución; no se incluye con datos personales en el ZIP. |
+| `docs/datasets/` | Datasets SGC descargados durante el bootstrap; se excluyen del ZIP por su tamaño y se recuperan desde la fuente oficial. |
+| `target/` | Artefactos de compilación generados por Maven; no forma parte del código fuente entregado. |
+
+La lectura recomendada es: este `README.md`, la
+[interpretación del desarrollo con IA](docs/INTERPRETACION_DESARROLLO_CON_IA.md),
+la [especificación consolidada](docs/ESPECIFICACION_DEL_SISTEMA.md), el
+[índice de diagramas](docs/uml/README.md) y, finalmente, el código bajo `src/`.
+
+## Contenido del Entregable 2
+
+El paquete de entrega incluye código fuente, pruebas, recursos del frontend,
+especificaciones SDD, contratos, documentación, fuentes PlantUML y la
+interpretación del trabajo realizado con asistencia de IA. Se excluyen `.git`,
+`target`, archivos de persistencia local, datasets descargados, herramientas
+temporales de generación documental y entregables PDF/DOCX anteriores.
+
 ## Requisitos
 
 - Java 21
@@ -107,3 +145,6 @@ polígonos se aplica únicamente al GeoJSON de visualización (SC-001).
 La guía de escenarios de extremo a extremo (E1–E9) y los criterios de
 aceptación están en `specs/001-geoinsight-core/quickstart.md`; el contrato REST
 en `specs/001-geoinsight-core/contracts/api.md`.
+
+La ejecución verificada más reciente de `./mvnw.cmd clean verify` terminó con
+`BUILD SUCCESS`: 101 pruebas ejecutadas, 0 fallos, 0 errores y 0 omitidas.

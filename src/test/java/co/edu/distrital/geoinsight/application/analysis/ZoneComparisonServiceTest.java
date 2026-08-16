@@ -18,19 +18,24 @@ import static org.mockito.Mockito.when;
 class ZoneComparisonServiceTest {
 
     @Test
-    void nearestValuesAreSelectedOnlyFromEntitiesAlreadyInsideEachRadius() {
+    void comparesTwoDifferentZonesAndSelectsEachZonesNearestEntity() {
         ZoneAnalysisService analysisService = mock(ZoneAnalysisService.class);
-        Zone zone = new Zone(new Coordinate(-74, 4), 1_000);
-        GeoscienceEntity fartherInside = point("B", Domain.VOLCAN, -74.005, 4);
-        GeoscienceEntity nearerInside = point("A", Domain.VOLCAN, -74.001, 4);
-        ZoneAnalysisResult analysis = result(zone, List.of(fartherInside, nearerInside));
-        when(analysisService.analyze(zone)).thenReturn(analysis);
+        Zone zoneA = new Zone(new Coordinate(-74, 4), 1_000);
+        Zone zoneB = new Zone(new Coordinate(-75, 5), 1_000);
+        GeoscienceEntity fartherFromA = point("A-2", Domain.VOLCAN, -74.005, 4);
+        GeoscienceEntity nearerToA = point("A-1", Domain.VOLCAN, -74.001, 4);
+        GeoscienceEntity nearerToB = point("B-1", Domain.VOLCAN, -75.001, 5);
+        ZoneAnalysisResult analysisA = result(zoneA, List.of(fartherFromA, nearerToA));
+        ZoneAnalysisResult analysisB = result(zoneB, List.of(nearerToB));
+        when(analysisService.analyze(zoneA)).thenReturn(analysisA);
+        when(analysisService.analyze(zoneB)).thenReturn(analysisB);
 
-        ComparedZone compared = new ZoneComparisonService(analysisService).compare(zone, zone).zoneA();
+        ZoneComparisonResult comparison = new ZoneComparisonService(analysisService).compare(zoneA, zoneB);
 
-        assertThat(compared.nearestVolcano().entity()).isEqualTo(nearerInside);
-        assertThat(compared.nearestFault()).isNull();
-        assertThat(compared.analysis()).isSameAs(analysis);
+        assertThat(comparison.zoneA().nearestVolcano().entity()).isEqualTo(nearerToA);
+        assertThat(comparison.zoneA().analysis()).isSameAs(analysisA);
+        assertThat(comparison.zoneB().nearestVolcano().entity()).isEqualTo(nearerToB);
+        assertThat(comparison.zoneB().analysis()).isSameAs(analysisB);
     }
 
     @Test

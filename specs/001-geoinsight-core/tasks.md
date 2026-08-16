@@ -246,6 +246,21 @@ scripts/download-datasets.ps1         # descarga manual (base del bootstrap)
 - [x] T066 [US5] Unificar el contrato de comparación con un único `radiusMeters` común para ambas coordenadas en `CompareRequest`, `AnalysisController`, `contracts/api.md`, `compare.js` y pruebas web.
 - [x] T067 Sincronizar constitución 1.0.1, plan, research, modelo de datos, checklist y README con las decisiones implementadas y la ubicación oficial de artefactos Spec Kit.
 
+## Phase 11: Evidencia académica SDD
+
+**Purpose**: Hacer explícita y auditable la derivación desde los datos y la
+especificación hasta el diseño, el código y las pruebas.
+
+- [x] T070 [P] Documentar el diseño OO en `design.md` con diagramas Mermaid de
+  clases y arquitectura, incluyendo herencia, polimorfismo, encapsulamiento,
+  composición e interfaces de repositorio.
+- [x] T071 [P] Perfilar los cinco GeoJSON completos y registrar en
+  `data-dictionary.md` los 46 campos con tipo observado, nulabilidad, blancos,
+  cardinalidad, clasificación y restricciones de captura.
+- [x] T072 Crear `traceability.md` con la cadena datos → FR/SC → diseño y
+  contrato → tareas → implementación → pruebas, cubriendo FR-001..FR-051 y
+  SC-001..SC-011.
+
 ---
 
 ## Dependencies & Execution Order
