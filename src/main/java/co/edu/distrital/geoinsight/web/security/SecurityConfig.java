@@ -74,8 +74,7 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login.html", "/css/**", "/js/**", "/lib/**", "/images/**", "/assets/**",
-                                "/api/auth/register", "/api/auth/login", "/api/auth/logout",
-                                "/api/basemap/**").permitAll()
+                                "/api/auth/register", "/api/auth/login", "/api/auth/logout").permitAll()
                         .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex

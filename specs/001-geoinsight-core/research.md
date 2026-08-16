@@ -13,6 +13,13 @@ Fase 0 del workflow `/speckit.plan`. Consolidación de decisiones verificadas; n
 **Rationale**: `returnCountOnly` confirmó los conteos exactos (61/4866/7461/3/6826), que se usan para verificar la integridad de cada descarga inicial. En arranques posteriores se reutiliza el archivo local si puede cargarse y contiene entidades, sin volver a comparar el conteo oficial. `maxRecordCount` es 1000 para `MAPAGEOLOGIA` y 2000 para el resto, por eso es obligatoria la paginación.
 
 **Alternatives considered**:
+
+> **Corrección de trazabilidad (2026-08-16)**: los conteos oficiales versionados
+> (61/4866/7461/3/6826) también se comparan localmente en cada arranque. Un
+> archivo ausente, corrupto, vacío o con un conteo distinto se considera no
+> disponible y se vuelve a descargar. Esta regla sustituye la frase anterior
+> que permitía reutilizar cualquier archivo no vacío y mantiene la validación
+> sin consultar nuevamente la API oficial.
 - Descarga manual única por el usuario: descartada (decisión del usuario: auto-descarga al iniciar).
 - Links de exportación `/export?f=geojson`: descartados por no paginar y devolver respuestas truncadas.
 - Bundling de los GeoJSON en el repo: descartado (gitignore + decisión de auto-descarga).

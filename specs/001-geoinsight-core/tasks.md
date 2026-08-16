@@ -212,6 +212,19 @@ scripts/download-datasets.ps1         # descarga manual (base del bootstrap)
 
 **Purpose**: Sincronizar la experiencia implementada con FR-026..FR-042 sin alterar las reglas espaciales.
 
+> **Corrección de estado (2026-08-16)**: T047 queda cubierta únicamente para
+> el componente servidor mediante `PerformanceAcceptanceTest`. La medición de
+> render de navegador se identifica como T047b y sigue abierta. La marca previa
+> de T048 no tenía evidencia registrada y queda reabierta hasta completar
+> `validation.md`.
+
+- [x] T047a [P] Presupuestos backend SC-001..SC-003 con datasets reales:
+  GeoJSON pesado <10 s, contexto <5 s y zona <5 s.
+- [ ] T047b Medir en navegador el render completo de unidades (<10 s) y
+  registrar entorno/resultado en `validation.md`.
+- [ ] T048-R Ejecutar E1–E9, incluida la prueba offline, y registrar evidencia
+  visual en `validation.md`.
+
 - [x] T051 [US2] Capas inicialmente inactivas, render Canvas para puntos densos y control de respuestas asíncronas obsoletas en `static/js/map.js`.
 - [x] T052 [US2] Filtros OR por valores del mismo atributo y AND entre atributos; limpieza al cambiar capa; tabla de resultados con zoom en `LayerExplorationService`, `LayerController` y `static/js/map.js`.
 - [x] T053 [US3/US4/US5] Selector de coordenada explícito por formulario y consulta puntual limitada a su módulo.

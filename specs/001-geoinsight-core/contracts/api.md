@@ -9,6 +9,11 @@ Formato JSON. Errores: `{ "message": "..." }` con el código HTTP correspondient
 Todo acceso a la aplicación exige sesión (FR-021). Sin sesión, los navegadores son redirigidos a `login.html` y las APIs responden 401.
 
 ### `POST /api/auth/register`
+
+Los recursos estáticos necesarios para presentar `login.html` son la única
+excepción a la autenticación. `/api/basemap/**` exige sesión y responde `401`
+cuando no existe una sesión autenticada.
+
 Registra una cuenta de consulta. **Siempre** crea rol `USER` (FR-022).
 
 ```json

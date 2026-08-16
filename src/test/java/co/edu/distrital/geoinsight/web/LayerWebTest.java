@@ -65,8 +65,14 @@ class LayerWebTest {
     }
 
     @Test
-    void basemapIsPublic() throws Exception {
+    void unauthenticatedBasemapIsRejected() throws Exception {
         mockMvc.perform(get("/api/basemap/colombia"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void authenticatedBasemapIsAvailable() throws Exception {
+        mockMvc.perform(get("/api/basemap/colombia").session(session))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.type").value("FeatureCollection"));
     }

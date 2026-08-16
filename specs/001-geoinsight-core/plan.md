@@ -197,6 +197,14 @@ src/test/java/co/edu/distrital/geoinsight/
 
 ## Complexity Tracking
 
+### Corrección de integridad de datasets (2026-08-16)
+
+El bootstrap compara cada archivo local con el conteo oficial versionado. Si
+falta, está corrupto o incompleto, se marca como no disponible y se invoca el
+descargador. Esta decisión sustituye la descripción anterior que solo exigía
+que el archivo pudiera cargarse, y alinea el plan con la spec, que es la fuente
+de verdad.
+
 > **Fill ONLY if Constitution Check has violations that must be justified**
 
 Sin violaciones justificadas. El único aumento deliberado de complejidad es la **jerarquía de geometría** (6 tipos) y **repositorios como interfaz**, ambos exigidos por el dominio (geometrías multiparte reales en los datasets) y por la constitución (persistencia detrás de abstracciones), no especulativos.

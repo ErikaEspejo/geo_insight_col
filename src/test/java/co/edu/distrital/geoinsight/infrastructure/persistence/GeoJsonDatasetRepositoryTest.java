@@ -9,6 +9,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -47,6 +48,24 @@ class GeoJsonDatasetRepositoryTest {
         GeoJsonDatasetRepository repository = new GeoJsonDatasetRepository(tempDir, new ObjectMapper());
         repository.loadAll();
         assertThat(repository.missingDatasets()).containsAll(java.util.Set.copyOf(java.util.List.of(Domain.values())));
+    }
+
+    @Test
+    void truncatedDatasetIsMarkedMissingAndItsPartialEntitiesAreNotExposed() throws Exception {
+        Path realDataset = Path.of("docs/datasets/Volcanes.geojson").toAbsolutePath();
+        assumeTrue(Files.isRegularFile(realDataset), "dataset de volcanes no presente; se omite la prueba");
+        Files.copy(realDataset, tempDir.resolve("Volcanes.geojson"), StandardCopyOption.REPLACE_EXISTING);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        var root = objectMapper.readTree(tempDir.resolve("Volcanes.geojson").toFile());
+        ((com.fasterxml.jackson.databind.node.ArrayNode) root.path("features")).remove(0);
+        objectMapper.writeValue(tempDir.resolve("Volcanes.geojson").toFile(), root);
+
+        GeoJsonDatasetRepository repository = new GeoJsonDatasetRepository(tempDir, objectMapper);
+        repository.loadAll();
+
+        assertThat(repository.missingDatasets()).contains(Domain.VOLCAN);
+        assertThat(repository.findSgcByDomain(Domain.VOLCAN)).isEmpty();
     }
 
     @Test

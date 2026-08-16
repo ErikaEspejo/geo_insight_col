@@ -31,6 +31,10 @@
 
 ## Notes
 
+- Este checklist valida la calidad y trazabilidad de la especificación; no
+  constituye por sí mismo evidencia de ejecución de SC-001..SC-010. La
+  evidencia se registra en `validation.md`.
+
 - All items pass validation; spec is ready for `/speckit.plan`.
 - Decisions deferred to data inspection (FR-013, FR-018) are explicitly framed as
   dataset-derived rules, not invented requirements.

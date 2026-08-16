@@ -100,8 +100,12 @@ public class GeoJsonDatasetRepository implements DatasetRepository {
             presentAttributes.put(domain, Collections.unmodifiableSet(attributeNames));
             distinctValues.put(domain, computeDistinctValues(entities));
             attributeTypes.put(domain, computeAttributeTypes(entities));
-            if (entities.isEmpty()) {
+            if (entities.size() != source.expectedCount()) {
                 missing.add(domain);
+                entitiesByDomain.remove(domain);
+                presentAttributes.remove(domain);
+                distinctValues.remove(domain);
+                attributeTypes.remove(domain);
             }
         } catch (IOException e) {
             missing.add(domain);
