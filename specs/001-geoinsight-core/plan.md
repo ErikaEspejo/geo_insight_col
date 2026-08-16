@@ -124,9 +124,10 @@ Resuelve todos los puntos del Technical Context y las semánticas geoespaciales 
 - `index.html`: shell autenticado sin búsqueda global ni controles duplicados, navegación por módulos, mapa Leaflet, control flotante de capas, paneles de filtros/contexto/zona/comparación/ayuda y administración solo para ADMIN.
 - `js/map.js`: capas inicialmente inactivas; control flotante de capas en la esquina inferior derecha con icono convencional y selector desplegable; herramienta lateral “Explorar mapa” eliminada; panel contextual inicialmente colapsado; puntos densos en Canvas; protección contra respuestas asíncronas obsoletas; selección de entidades; tabla de filtros con enfoque; selectores explícitos de coordenadas; centros/radios; dibujo administrativo Point/LineString/Polygon.
 - `js/compare.js`: tarjetas por dominio, contexto central, vecinos/distancias, estados explícitos, observaciones descriptivas cerradas y tabla resumen secundaria.
+- `js/context.js`: consulta del contexto de una coordenada presentada en tres secciones (Resultado, Contexto geológico, Elementos cercanos) con tarjetas compactas, nombres descriptivos priorizados, distancias m/km con un decimal y estados de ausencia legibles; delega el dibujo del contexto en `GeoInsightMap.drawContext`.
 - `js/admin.js`: formulario dinámico desde metadata, coerción tipada, vocabularios categóricos, lista persistente “Mis entidades”, capa administrativa por color y modal propio de eliminación.
 - `js/auth.js`: login y registro local; no incluye SSO institucional.
-- `css/styles.css` y `css/layers.css`: sistema visual general y control flotante de capas (esquina inferior derecha) con estados normal, hover, foco y activo.
+- `css/styles.css`, `css/layers.css` y `css/context.css`: sistema visual general, control flotante de capas (esquina inferior derecha) y tarjetas/marcador de la consulta por coordenada.
 - `lib/leaflet/`: Leaflet vendoreado localmente (offline).
 
 ### Performance (SC-001..SC-003)

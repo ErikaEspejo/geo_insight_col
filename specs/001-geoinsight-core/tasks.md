@@ -129,6 +129,8 @@ scripts/download-datasets.ps1         # descarga manual (base del bootstrap)
 - [x] T031 [US3] `CoordinateContextService` en `src/main/java/co/edu/distrital/geoinsight/application/analysis/` (unidades contenientes, dominios contenientes, más cercanos por distancia mínima punto-geometría, empates deterministas, ausencia explícita)
 - [x] T032 [US3] Extender `AnalysisController`: POST `/api/context` con DTO validado en `src/main/java/co/edu/distrital/geoinsight/web/controller/AnalysisController.java`
 - [x] T033 [US3] Frontend: formulario de coordenada + clic en el mapa + panel de resultados por dominio en `src/main/resources/static/js/context.js` + `index.html`
+- [x] T033a [US3] Presentación por secciones (Resultado / Contexto geológico / Elementos cercanos) con tarjetas compactas, nombres descriptivos priorizados e identificadores secundarios, distancias m/km con un decimal y mensajes de ausencia legibles en `js/context.js` + `css/context.css`
+- [x] T033b [US3] Relación con el mapa: marcador propio de la ubicación consultada, resaltado de contenedores y de falla/movimiento/volcán más cercanos (panes `contextContainers`/`contextNearest`), vista ajustada a los elementos resaltados desde el formulario y conservada en el clic en `js/map.js`
 
 **Checkpoint**: US3 funcional e independientemente testeable.
 

@@ -137,6 +137,8 @@ Tipos confirmados en los datos locales:
 - La consulta por coordenada responde a clics únicamente cuando su módulo está activo. Zona A, Zona B y análisis de zona usan un selector explícito de un solo clic.
 - Los campos de coordenadas permanecen vacíos y muestran el formato esperado mediante placeholders; el selector del mapa reemplaza esos valores cuando se activa explícitamente.
 - Comparación dibuja centros A/B y círculos diferenciados y ajusta el viewport a la unión de ambos bounds.
+- La consulta por coordenada organiza sus resultados en tres secciones (Resultado, Contexto geológico, Elementos cercanos) con tarjetas compactas. Los nombres descriptivos del dataset tienen prioridad sobre los identificadores técnicos (mostrados de forma secundaria); las distancias usan metros bajo 1 km y kilómetros desde 1 km, con un decimal y separador decimal español.
+- En el mapa, la consulta por coordenada marca la ubicación con un símbolo propio (diana azul con pulso), resalta las geometrías contenedoras con borde y relleno transparente, y dibuja la falla, el movimiento en masa y el volcán más cercanos con estilos propios por dominio. Al consultar desde el formulario ajusta la vista a la unión de los elementos resaltados (con un zoom máximo que conserva el contexto); al consultar con clic conserva la vista natural.
 - Administración captura geometrías con clics: uno para Point, mínimo dos para LineString y mínimo tres para Polygon; el anillo se cierra al finalizar.
 
 **Alternatives considered**:

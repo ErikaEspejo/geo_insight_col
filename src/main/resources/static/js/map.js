@@ -17,6 +17,13 @@
   map.getPane('geoLines').style.zIndex = 430;
   map.createPane('geoPoints');
   map.getPane('geoPoints').style.zIndex = 450;
+  // El contexto de la consulta por coordenada se dibuja por encima de las
+  // capas temáticas (geometrías contenedoras y elementos cercanos), dejando el
+  // marcador de la ubicación consultada en el pane de marcadores (600).
+  map.createPane('contextContainers');
+  map.getPane('contextContainers').style.zIndex = 460;
+  map.createPane('contextNearest');
+  map.getPane('contextNearest').style.zIndex = 480;
 
   let offlineFillAdded = false;
 
@@ -273,6 +280,100 @@
     clearZoneEntities();
   }
 
+  // Consulta por coordenada (FR-009): resalta la ubicación consultada, las
+  // geometrías que la contienen y el elemento más cercano por dominio, con una
+  // jerarquía visual: marcador > elementos cercanos > contenedores > capas.
+  // El zoom se ajusta solo al consultar desde el formulario; un clic en el mapa
+  // conserva el viewport natural del usuario.
+  const contextState = { marker: null, containers: null, nearest: null };
+
+  function clearContext() {
+    if (contextState.marker) map.removeLayer(contextState.marker);
+    if (contextState.containers) map.removeLayer(contextState.containers);
+    if (contextState.nearest) map.removeLayer(contextState.nearest);
+    contextState.marker = null;
+    contextState.containers = null;
+    contextState.nearest = null;
+  }
+
+  function drawContextMarker(lon, lat) {
+    if (contextState.marker) map.removeLayer(contextState.marker);
+    contextState.marker = L.marker([lat, lon], {
+      icon: L.divIcon({
+        className: 'context-location-wrapper',
+        html: '<span class="context-location-ring"></span><span class="context-location-core"></span>',
+        iconSize: [38, 38],
+        iconAnchor: [19, 19]
+      }),
+      interactive: false,
+      keyboard: false
+    }).addTo(map);
+  }
+
+  function renderContextContainers(units, domains) {
+    const entities = [...units, ...domains];
+    if (entities.length === 0) return;
+    const features = entities.map(zoneEntityFeature);
+    contextState.containers = L.geoJSON({ type: 'FeatureCollection', features }, {
+      pane: 'contextContainers',
+      style: (feature) => {
+        const color = domainStyle(feature.properties._domain).color;
+        return { color, weight: 2, fillColor: color, fillOpacity: 0.09, dashArray: '5 4' };
+      },
+      interactive: false
+    }).addTo(map);
+  }
+
+  function renderContextNearest(faultEntity, movementEntity, volcanoEntity) {
+    const features = [];
+    if (faultEntity) features.push(zoneEntityFeature(faultEntity));
+    if (movementEntity) features.push(zoneEntityFeature(movementEntity));
+    if (volcanoEntity) features.push(zoneEntityFeature(volcanoEntity));
+    if (features.length === 0) return;
+    contextState.nearest = L.geoJSON({ type: 'FeatureCollection', features }, {
+      pane: 'contextNearest',
+      style: (feature) => feature.properties._domain === 'FALLA_GEOLOGICA'
+        ? { color: '#0b3b66', weight: 3.5, opacity: 0.95 }
+        : { color: '#e45756', weight: 2.5, opacity: 0.95, fillColor: '#e45756', fillOpacity: 0.35 },
+      pointToLayer: (feature, latlng) => {
+        const isVolcano = feature.properties._domain === 'VOLCAN';
+        return L.circleMarker(latlng, {
+          radius: 9,
+          color: '#ffffff',
+          weight: 2.5,
+          fillColor: isVolcano ? '#d97706' : '#e45756',
+          fillOpacity: 1
+        });
+      },
+      interactive: false
+    }).addTo(map);
+  }
+
+  function contextBounds(lon, lat) {
+    const bounds = L.latLngBounds([lat, lon]);
+    if (contextState.containers) bounds.extend(contextState.containers.getBounds());
+    if (contextState.nearest) bounds.extend(contextState.nearest.getBounds());
+    return bounds;
+  }
+
+  function drawContext(data, opts) {
+    clearContext();
+    drawContextMarker(data.coordinate.lon, data.coordinate.lat);
+    renderContextContainers(data.geologicalUnits || [], data.tectonicDomains || []);
+    renderContextNearest(
+      data.nearestFault?.entity || null,
+      data.nearestMassMovement?.entity || null,
+      data.nearestVolcano?.entity || null
+    );
+    if (!opts || !opts.fromMapClick) {
+      map.fitBounds(contextBounds(data.coordinate.lon, data.coordinate.lat), {
+        padding: [48, 48],
+        maxZoom: 13
+      });
+    }
+  }
+
+
   function drawComparisonZones(zoneA, zoneB) {
     clearZoneCircles();
     const zones = [
@@ -320,6 +421,8 @@
     renderAdminGeometry,
     clearAdminGeometry,
     renderAdminEntities,
+    drawContext,
+    clearContext,
     domainColor: (domain) => domainStyle(domain).color,
     closeEntityInfo
   };

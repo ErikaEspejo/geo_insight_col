@@ -13,6 +13,13 @@ const ui = {
     return `${meters.toLocaleString('es-CO', { maximumFractionDigits: 0 })} m`;
   },
 
+  formatDistance(meters) {
+    if (meters === null || meters === undefined || !Number.isFinite(meters)) return '—';
+    const digits = { minimumFractionDigits: 1, maximumFractionDigits: 1 };
+    if (meters < 1000) return `${meters.toLocaleString('es-CO', digits)} m`;
+    return `${(meters / 1000).toLocaleString('es-CO', digits)} km`;
+  },
+
   formatNumber(value) {
     return Number(value).toLocaleString('es-CO');
   },

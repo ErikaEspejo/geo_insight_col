@@ -72,6 +72,10 @@ El usuario ingresa o selecciona una coordenada y el sistema responde qué contex
 3. **Given** una coordenada no válida, **When** se consulta, **Then** el sistema la rechaza con un mensaje claro.
 4. **Given** empates de proximidad o geometrías superpuestas, **When** se consulta, **Then** el sistema aplica la regla definida en la especificación de datos.
 5. **Given** otra herramienta activa, **When** el usuario hace clic en el mapa, **Then** no se ejecuta ni se abre la consulta por coordenada; el clic consulta coordenadas solo dentro de su módulo.
+6. **Given** una consulta con resultados, **When** se presentan, **Then** se organizan en tres secciones (Resultado, Contexto geológico, Elementos cercanos) y cada dominio se muestra en una tarjeta compacta con nombre descriptivo y distancia legible.
+7. **Given** una consulta ejecutada desde el formulario, **When** llegan los resultados, **Then** el mapa marca la ubicación consultada con un símbolo propio, resalta los contenedores y los elementos más cercanos (incluido el volcán) y ajusta la vista para mostrarlos todos, sin superar un zoom máximo.
+8. **Given** un clic en el mapa dentro del módulo, **When** se ejecuta la consulta, **Then** el mapa conserva la vista natural sin cambios bruscos de zoom.
+9. **Given** un dominio sin información, **When** se presentan los resultados, **Then** se muestra un mensaje legible sin valores `null`, estructuras JSON ni identificadores vacíos.
 
 ---
 
@@ -196,6 +200,10 @@ El administrador crea, edita y elimina entidades de origen GEOINSIGHT en cualqui
 - **FR-040**: El control flotante de capas DEBE ubicarse en la esquina inferior derecha del mapa, ser compacto, combinar el icono convencional de capas apiladas con la etiqueta “Capas” y mantener tooltip, etiqueta accesible y estados de interacción sin alterar su operación.
 - **FR-041**: El selector de capas DEBE abrirse hacia arriba sobre el control, contener la misma lista de capas por dominio y DEBE cerrarse con un clic fuera del control o con la tecla Escape; la herramienta lateral “Explorar mapa” NO DEBE existir porque el control flotante es el único punto de activación de capas.
 - **FR-042**: El panel contextual DEBE iniciar colapsado y sin módulo activo; al elegir una herramienta DEBE abrirse con el módulo correspondiente y el estado visual del botón de colapso DEBE coincidir con el panel.
+- **FR-043**: La consulta por coordenada DEBE presentar los resultados en tres secciones diferenciadas (Resultado, Contexto geológico y Elementos cercanos), cada dominio en una tarjeta compacta, sin mezclar contenedores con elementos próximos.
+- **FR-044**: Las distancias DEBEN mostrarse en metros con un decimal para distancias menores a 1 km y en kilómetros con un decimal para distancias de 1 km o más, con separador decimal en español.
+- **FR-045**: La consulta por coordenada DEBE marcar la ubicación consultada con un símbolo propio distinto de las entidades, resaltar las geometrías contenedoras y los elementos más cercanos (falla, movimiento en masa y volcán) y ajustar la vista al consultar desde el formulario para que queden visibles todos los elementos resaltados, sin superar un zoom máximo que conserve el contexto; el clic en el mapa NO DEBE alterar bruscamente la vista.
+- **FR-046**: Los resultados DEBEN priorizar los nombres descriptivos del dataset y mostrar los identificadores técnicos como información secundaria; la ausencia de información por dominio DEBE presentarse con mensajes legibles y no inferir riesgo, amenaza o peligrosidad (FR-012).
 
 ### Key Entities *(include if feature involves data)*
 

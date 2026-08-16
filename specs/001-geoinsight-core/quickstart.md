@@ -56,11 +56,13 @@ Al arrancar el backend:
 10. Cerrar el selector con clic fuera o Escape → se cierra y el botón restablece su estado; la herramienta lateral “Explorar mapa” ya no existe en el menú.
 11. Recargar la aplicación → el panel contextual inicia colapsado y sin módulo activo; al elegir una herramienta se abre su módulo y el chevrón cambia de forma consistente al abrir/cerrar.
 
-### E3. Consulta por coordenada (SC-002, FR-009, FR-014, FR-016, FR-029)
+### E3. Consulta por coordenada (SC-002, FR-009, FR-014, FR-016, FR-029, FR-043, FR-044, FR-045, FR-046)
 1. `POST /api/context` con coordenada dentro de cobertura → unidad conteniente, dominio conteniente, falla/movimiento/volcán más cercanos con distancias.
 2. Coordenada fuera de toda cobertura → ausencia explícita: contenedores vacíos (`geologicalUnits`/`tectonicDomains` = `[]`) y más cercanos con su distancia real (nunca datos inventados; `nearest*` solo es `null` si el dominio no tiene entidades), cumpliendo FR-014.
 3. Coordenada inválida (lat 95) → `400` con mensaje claro.
 4. Clic en el mapa dentro de Consulta por coordenada → completa y consulta; el mismo clic desde otra pestaña no abre este módulo.
+5. Consulta desde el formulario → resultados en tarjetas por sección (Resultado, Contexto geológico, Elementos cercanos), distancias en m (< 1 km) o km (≥ 1 km) con un decimal, nombres descriptivos priorizados; dominio sin datos → mensaje legible, sin `null` ni JSON.
+6. La vista del mapa ajusta para mostrar el marcador propio de la ubicación, los contenedores resaltados y la falla, el movimiento y el volcán más cercanos (zoom máximo conservado); el clic en el mapa conserva la vista natural.
 
 ### E4. Análisis de zona (SC-003, FR-010, FR-012, FR-016, FR-029, FR-030, FR-038)
 1. `POST /api/zones/analyze` con centro y radio → conteos, distribuciones por `TIPO`/`SUBTIPO`/`CLAS_MAPA`, listados por dominio.
